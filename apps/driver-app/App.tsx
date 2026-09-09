@@ -1,16 +1,26 @@
 import React from 'react';
-import {StatusBar} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-
-import LoginScreen from './src/screens/auth/LoginScreen';
+import {StyleSheet, Text, View} from 'react-native';
 
 function App() {
+  console.log('*** APP IS RENDERING ***');
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
-      <LoginScreen />
-    </SafeAreaProvider>
+    <View style={styles.container}>
+      <Text style={styles.text}>UniTransit Driver App</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 20,
+    color: '#000000',
+  },
+});
 
 export default App;
