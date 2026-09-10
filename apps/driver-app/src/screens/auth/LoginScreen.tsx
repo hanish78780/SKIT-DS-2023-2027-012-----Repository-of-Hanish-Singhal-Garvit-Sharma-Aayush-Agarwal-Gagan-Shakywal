@@ -12,7 +12,11 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import colors from '../../theme/colors';
 
-const LoginScreen = () => {
+interface LoginScreenProps {
+  onLoginSuccess?: (driverId: string) => void;
+}
+
+const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
   const [driverId, setDriverId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +32,9 @@ const LoginScreen = () => {
 
     setError('');
     console.log('Driver login submitted', {driverId: trimmedDriverId});
+    if (onLoginSuccess) {
+      onLoginSuccess(trimmedDriverId);
+    }
   };
 
   return (

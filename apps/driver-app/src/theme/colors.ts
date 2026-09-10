@@ -7,7 +7,11 @@ const colors = {
   textSecondary: '#667085',
   border: '#E4E7EC',
   success: '#12B76A',
+  successBg: '#ECFDF3',
   error: '#F04438',
+  errorBg: '#FEF3F2',
+  warning: '#F79009',
+  warningBg: '#FFFAEB',
   white: '#FFFFFF',
 };
 
