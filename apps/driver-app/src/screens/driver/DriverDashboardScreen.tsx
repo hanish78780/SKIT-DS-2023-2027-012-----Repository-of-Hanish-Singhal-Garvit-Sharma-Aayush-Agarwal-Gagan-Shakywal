@@ -33,12 +33,12 @@ const DriverDashboardScreen: React.FC<DriverDashboardScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.brandGroup}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>U</Text>
+          <View style={styles.skitBadgeHeader}>
+            <Text style={styles.skitBadgeHeaderText}>SKIT</Text>
           </View>
           <View>
             <Text style={styles.brandTitle}>UniTransit</Text>
-            <Text style={styles.brandSubtitle}>Driver Portal</Text>
+            <Text style={styles.brandSubtitle}>SKIT Jaipur • Driver Portal</Text>
           </View>
         </View>
         <Pressable
@@ -91,19 +91,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.primary,
+  skitBadgeHeader: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#800000',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: '#FFD700',
   },
-  logoText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: '700',
+  skitBadgeHeaderText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
   brandTitle: {
     color: colors.text,

@@ -44,11 +44,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <View style={styles.header}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoText}>U</Text>
+            <View style={styles.skitBadgeContainer}>
+              <View style={styles.skitBadgeInner}>
+                <Text style={styles.skitBadgeText}>SKIT</Text>
+                <Text style={styles.skitBadgeSubtext}>JAIPUR</Text>
+              </View>
             </View>
             <Text style={styles.appName}>UniTransit</Text>
-            <Text style={styles.subtitle}>Driver Portal</Text>
+            <Text style={styles.collegeName}>
+              Swami Keshvanand Institute of Technology
+            </Text>
+            <Text style={styles.subtitle}>Driver Transportation Portal</Text>
           </View>
 
           <View style={styles.card}>
@@ -142,29 +148,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 28,
   },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  skitBadgeContainer: {
+    width: 68,
+    height: 68,
+    borderRadius: 18,
+    backgroundColor: '#800000',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#FFD700',
   },
-  logoText: {
-    color: colors.white,
-    fontSize: 30,
-    fontWeight: '700',
+  skitBadgeInner: {
+    alignItems: 'center',
+  },
+  skitBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  skitBadgeSubtext: {
+    color: '#FFD700',
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginTop: -2,
   },
   appName: {
     color: colors.text,
     fontSize: 28,
+    fontWeight: '800',
+  },
+  collegeName: {
+    color: colors.primary,
+    fontSize: 12,
     fontWeight: '700',
+    marginTop: 2,
+    textAlign: 'center',
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 3,
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 2,
   },
   card: {
     backgroundColor: colors.surface,
