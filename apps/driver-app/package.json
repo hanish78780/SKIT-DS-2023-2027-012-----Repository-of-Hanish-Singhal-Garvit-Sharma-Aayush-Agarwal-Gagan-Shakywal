@@ -10,6 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "react": "19.2.3",
+    "react-native": "0.87.1",
+    "@react-native/new-app-screen": "0.87.1",
     "@react-native/new-app-screen": "0.87.1",
     "react": "19.2.3",
     "react-native": "^0.87.1",
@@ -39,4 +42,5 @@
   "engines": {
     "node": ">= 22.11.0"
   }
+}
 }
