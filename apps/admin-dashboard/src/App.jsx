@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 import "./App.css";
+import Login from "./pages/Login";
 import {
   LayoutDashboard,
   Users,
@@ -56,6 +58,12 @@ const activities = [
   },
 ];
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  }
+
   return (
     <div className="admin-layout">
 

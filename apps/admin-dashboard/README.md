@@ -1,16 +1,40 @@
-# React + Vite
+# UniTransit - Admin Dashboard 🚍
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the central administrative portal for the **UniTransit College Transportation Management System**. It allows administrators to manage buses, drivers, students, routes, and track live trips.
 
-Currently, two official plugins are available:
+## Tech Stack
+- **Framework:** React.js + Vite
+- **Styling:** Vanilla CSS (Responsive, matching Figma designs)
+- **Icons:** `lucide-react`
+- **Routing:** React Router (v6+)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How to Run Locally
 
-## React Compiler
+1. Make sure you have Node.js installed.
+2. Navigate to this directory (`apps/admin-dashboard`).
+3. Install the dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open your browser to the local address provided (usually `http://localhost:5173`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Project Progress
 
-## Expanding the ESLint configuration
+### ✅ Week 1: Foundation
+- Monorepo setup initialized.
+- Created the basic `admin-dashboard` React/Vite app.
+- Built the initial static layout shell (Sidebar, Navbar, Dashboard overview) with mock data.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🚧 Week 2: Advanced UI & Routing
+- **Day 1:** Built the standalone Admin Login (Sign-In) screen with a split-screen design, perfectly matching the official Figma design. Added mock authentication state to protect the dashboard.
+- *(Upcoming)* **Day 2:** Refactoring the monolithic layout into reusable components (`Sidebar.jsx`, `Navbar.jsx`, `Layout.jsx`) and introducing React Router for page navigation.
+- *(Upcoming)* **Days 3-7:** Building out dedicated pages for Students, Drivers, Buses, Routes, and Live Tracking.
+
+## Team Guidelines
+- This module is maintained exclusively by the Admin Dashboard developer.
+- Do NOT make direct changes to the `driver-app` or `student-app` folders.
+- Ensure all UI changes are responsive (mobile and tablet friendly) before committing.
