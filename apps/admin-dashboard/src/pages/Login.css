@@ -344,7 +344,10 @@
 /* Responsive Design */
 @media (max-width: 900px) {
   .login-container {
+    height: auto;
+    min-height: 100vh;
     flex-direction: column;
+    overflow: visible;
   }
   
   .login-left {
