@@ -1,4 +1,4 @@
-package com.driverapptemp
+package com.unitransitstudent
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
