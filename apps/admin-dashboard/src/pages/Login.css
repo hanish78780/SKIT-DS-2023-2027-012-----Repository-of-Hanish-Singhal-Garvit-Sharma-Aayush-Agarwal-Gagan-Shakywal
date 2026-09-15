@@ -113,7 +113,7 @@
   width: 100%;
 }
 
-.stat-card {
+.login-stat-card {
   background-color: #242c40; /* Slightly lighter than bg */
   border-radius: 16px;
   padding: 1.25rem 1.75rem;
@@ -124,7 +124,7 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.stat-icon {
+.login-stat-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,7 +135,7 @@
 .driver-icon { color: #94a3b8; }
 .student-icon { color: #a855f7; } /* Purple */
 
-.stat-info h3 {
+.login-stat-info h3 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
@@ -143,7 +143,7 @@
   line-height: 1.2;
 }
 
-.stat-info p {
+.login-stat-info p {
   margin: 0;
   color: #94a3b8;
   font-size: 0.95rem;

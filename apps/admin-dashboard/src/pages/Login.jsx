@@ -29,31 +29,31 @@ const Login = ({ onLogin }) => {
           </div>
           
           <div className="stats-list">
-            <div className="stat-card">
-              <div className="stat-icon">
+            <div className="login-stat-card">
+              <div className="login-stat-icon">
                 <img src="/bus-icon.png" alt="Bus Icon" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
               </div>
-              <div className="stat-info">
+              <div className="login-stat-info">
                 <h3>24 Buses</h3>
                 <p>Actively managed</p>
               </div>
             </div>
             
-            <div className="stat-card">
-              <div className="stat-icon">
+            <div className="login-stat-card">
+              <div className="login-stat-icon">
                 <img src="/driver-icon.png" alt="Driver Icon" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
               </div>
-              <div className="stat-info">
+              <div className="login-stat-info">
                 <h3>28 Drivers</h3>
                 <p>Registered & trained</p>
               </div>
             </div>
             
-            <div className="stat-card">
-              <div className="stat-icon">
+            <div className="login-stat-card">
+              <div className="login-stat-icon">
                 <img src="/student-icon.png" alt="Student Icon" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
               </div>
-              <div className="stat-info">
+              <div className="login-stat-info">
                 <h3>1,240 Students</h3>
                 <p>Enrolled in transport</p>
               </div>
