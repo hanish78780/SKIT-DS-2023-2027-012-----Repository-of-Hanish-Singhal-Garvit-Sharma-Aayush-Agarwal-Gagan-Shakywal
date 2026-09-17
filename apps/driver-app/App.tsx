@@ -1,13 +1,13 @@
 import React from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';
-
-import LoginScreen from './src/screens/auth/LoginScreen';
+import AppNavigator from './src/navigation/AppNavigator';
+import colors from './src/theme/colors';
 
 function App() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <LoginScreen />
+      <AppNavigator />
     </View>
   );
 }
@@ -15,10 +15,8 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+    backgroundColor: colors.background,
   },
 });
 
 export default App;
-
-
