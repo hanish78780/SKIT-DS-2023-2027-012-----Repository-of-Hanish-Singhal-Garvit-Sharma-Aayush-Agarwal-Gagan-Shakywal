@@ -1,14 +1,14 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f7fb;
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-  color: #1f2937;
+  background: #f4f7fb;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
 }
 
 .main-content {
-  margin-left: 250px;
-  width: calc(100% - 250px);
+  margin-left: 260px;
+  width: calc(100% - 260px);
   display: flex;
   flex-direction: column;
 }
@@ -16,12 +16,12 @@
 .page-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 2rem;
+  padding: 0;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .main-content {
-    margin-left: 200px;
-    width: calc(100% - 200px);
+    margin-left: 0;
+    width: 100%;
   }
 }

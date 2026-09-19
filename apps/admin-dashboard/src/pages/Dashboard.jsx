@@ -1,134 +1,218 @@
 import React from 'react';
-import { UserRound, Bus, Activity, GraduationCap, Route, MapPin, CheckCircle2, Clock } from 'lucide-react';
+import { Bus, UserRound, Users, Clock } from 'lucide-react';
 import './Dashboard.css';
-
-const stats = [
-  { title: "Total Students", value: "1,250", description: "Enrolled in transport", icon: GraduationCap, color: "purple" },
-  { title: "Total Drivers", value: "48", description: "Registered & trained", icon: UserRound, color: "gray" },
-  { title: "Total Buses", value: "32", description: "Actively managed", icon: Bus, color: "yellow" },
-  { title: "Total Routes", value: "12", description: "Active routes", icon: Route, color: "blue" },
-  { title: "Active Trips", value: "18", description: "Currently running", icon: Activity, color: "green" },
-];
-
-const activeTrips = [
-  { id: "TRP-1001", bus: "UP-32-AB-1234", driver: "Ramesh Kumar", route: "Route A (Jaipur Central)", status: "On Time", time: "10 mins away" },
-  { id: "TRP-1002", bus: "RJ-14-CD-5678", driver: "Suresh Singh", route: "Route B (Malviya Nagar)", status: "Delayed", time: "25 mins away" },
-  { id: "TRP-1003", bus: "RJ-14-XY-9012", driver: "Amit Sharma", route: "Route C (Mansarovar)", status: "On Time", time: "5 mins away" },
-];
-
-const recentTrips = [
-  { id: "TRP-0998", date: "Oct 24, 2026", route: "Route A", driver: "Ramesh Kumar", students: 45, status: "Completed" },
-  { id: "TRP-0999", date: "Oct 24, 2026", route: "Route B", driver: "Suresh Singh", students: 38, status: "Completed" },
-  { id: "TRP-1000", date: "Oct 24, 2026", route: "Route C", driver: "Amit Sharma", students: 42, status: "Completed" },
-];
 
 const Dashboard = () => {
   return (
-    <section className="dashboard-content">
-      <div className="dashboard-header">
-        <h2>Overview</h2>
-        <p>Monitor your fleet's daily performance and active trips.</p>
+    <div className="dashboard-wrapper">
+      {/* Stats Row */}
+      <div className="stats-container">
+        <div className="stat-card">
+           <div className="stat-icon-box bg-blue-light"><Bus size={22} className="text-blue" /></div>
+           <div className="stat-info">
+             <h3>24</h3>
+             <p>Total Buses</p>
+             <span className="trend-green">↑ 2 added this month</span>
+           </div>
+        </div>
+        <div className="stat-card">
+           <div className="stat-icon-box bg-green-light"><Bus size={22} className="text-green" /></div>
+           <div className="stat-info">
+             <h3>12</h3>
+             <p>Active Buses</p>
+           </div>
+        </div>
+        <div className="stat-card">
+           <div className="stat-icon-box bg-red-light"><UserRound size={22} className="text-red" /></div>
+           <div className="stat-info">
+             <h3>28</h3>
+             <p>Drivers</p>
+             <span className="trend-green">↑ 3 online now</span>
+           </div>
+        </div>
+        <div className="stat-card">
+           <div className="stat-icon-box bg-orange-light"><Users size={22} className="text-orange" /></div>
+           <div className="stat-info">
+             <h3>1,240</h3>
+             <p>Students</p>
+           </div>
+        </div>
+        <div className="stat-card">
+           <div className="stat-icon-box bg-purple-light"><Clock size={22} className="text-purple" /></div>
+           <div className="stat-info">
+             <h3>36</h3>
+             <p>Today's Trips</p>
+             <span className="trend-green">↑ 4 active now</span>
+           </div>
+        </div>
       </div>
 
-      {/* 5 Metric Cards */}
-      <div className="stats-grid-5">
-        {stats.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <div className={`metric-card border-${stat.color}`} key={idx}>
-              <div className="metric-header">
-                <div className={`metric-icon-box bg-${stat.color}`}>
-                  <Icon size={20} />
-                </div>
-                <span className="metric-title">{stat.title}</span>
-              </div>
-              <h3>{stat.value}</h3>
-              <p>{stat.description}</p>
+      <div className="dashboard-grid">
+        {/* Left Column */}
+        <div className="dashboard-left">
+          <div className="card live-tracking-card">
+            <div className="card-header">
+              <h2>Live Bus Tracking</h2>
+              <p>Real-time positions · SKIT Jaipur Campus</p>
             </div>
-          );
-        })}
-      </div>
+            <div className="map-area">
+               <svg className="map-svg" viewBox="0 0 800 400" preserveAspectRatio="none">
+                 <path d="M 150 300 Q 350 150, 500 100" stroke="#2563eb" strokeWidth="4" strokeDasharray="8 8" fill="none" />
+                 <path d="M 150 300 Q 400 350, 450 320" stroke="#991b1b" strokeWidth="4" strokeDasharray="8 8" fill="none" />
+               </svg>
+               <div className="marker skit-marker" style={{ top: '300px', left: '150px' }}>
+                 <span className="dot bg-red"></span> SKIT
+               </div>
+               <div className="marker bus-marker" style={{ top: '230px', left: '260px' }}>
+                 <div className="bus-icon bg-blue"><Bus size={14}/></div>
+                 <span>-1234</span>
+               </div>
+               <div className="marker bus-marker" style={{ top: '150px', left: '380px' }}>
+                 <div className="bus-icon bg-blue"><Bus size={14}/></div>
+                 <span>-1088</span>
+               </div>
+               <div className="marker bus-marker" style={{ top: '330px', left: '420px' }}>
+                 <div className="bus-icon bg-gray"><Bus size={14}/></div>
+                 <span>-4512</span>
+               </div>
 
-      <div className="dashboard-main-grid">
-        {/* Map Placeholder */}
-        <div className="dashboard-panel map-panel">
-          <div className="panel-header">
-            <h3>Live Fleet Tracking</h3>
-            <button className="view-map-btn">View Full Map</button>
-          </div>
-          <div className="map-placeholder">
-            <div className="map-grid-bg"></div>
-            <div className="map-center-content">
-              <div className="pulse-dot"></div>
-              <MapPin size={48} className="map-pin-icon" />
-              <p>Map Integration Pending</p>
-              <span>Google Maps API will be loaded here</span>
+               <div className="map-info-box">
+                 <strong>Live Bus Tracking</strong>
+                 <span>3 buses active · Updated just now</span>
+               </div>
             </div>
           </div>
         </div>
 
-        {/* Active Trips List */}
-        <div className="dashboard-panel active-trips-panel">
-          <div className="panel-header">
-            <h3>Active Trips</h3>
-            <span className="live-badge"><span className="dot"></span> Live</span>
+        {/* Right Column */}
+        <div className="dashboard-right">
+          <div className="card active-trips-card">
+             <div className="card-header space-between">
+                <div>
+                  <h2>Active Trips</h2>
+                  <p>Currently running</p>
+                </div>
+                <div className="live-indicator"><span className="dot bg-green"></span> Live</div>
+             </div>
+             
+             <div className="trips-feed">
+                <div className="feed-item">
+                  <div className="feed-info">
+                    <h4>TRIP-1024</h4>
+                    <p>RJ-14-AB-1234 · Rajesh Kumar</p>
+                    <p className="feed-route">SKIT → Jaipur · 42 students</p>
+                  </div>
+                  <div className="feed-status bg-green-light text-green">Active</div>
+                </div>
+                <div className="feed-divider"></div>
+                <div className="feed-item">
+                  <div className="feed-info">
+                    <h4>TRIP-1023</h4>
+                    <p>RJ-14-AB-1088 · Suresh Meena</p>
+                    <p className="feed-route">SKIT → Tonk Rd · 38 students</p>
+                  </div>
+                  <div className="feed-status bg-green-light text-green">Active</div>
+                </div>
+             </div>
           </div>
-          <div className="active-trips-list">
-            {activeTrips.map((trip) => (
-              <div className="active-trip-card" key={trip.id}>
-                <div className="trip-info">
-                  <h4>{trip.route}</h4>
-                  <p>Bus {trip.bus} • {trip.driver}</p>
-                </div>
-                <div className="trip-status-box">
-                  <span className={`status-text ${trip.status === 'Delayed' ? 'delayed' : 'on-time'}`}>
-                    {trip.status}
-                  </span>
-                  <span className="time-eta"><Clock size={12} /> ETA: {trip.time}</span>
-                </div>
-              </div>
-            ))}
+
+          <div className="summary-grid">
+            <div className="summary-card">
+              <h2 className="text-orange">2</h2>
+              <p>Buses on Maintenance</p>
+            </div>
+            <div className="summary-card">
+              <h2 className="text-green">8</h2>
+              <p>Drivers Available</p>
+            </div>
+            <div className="summary-card">
+              <h2 className="text-orange-dark">1</h2>
+              <p>Delayed Trips</p>
+            </div>
+            <div className="summary-card">
+              <h2 className="text-red">14</h2>
+              <p>Unassigned Students</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Trips Table */}
-      <div className="dashboard-panel full-width">
-        <div className="panel-header">
-          <h3>Recent Trips</h3>
-          <button className="view-all-btn">View All</button>
+      <div className="card table-card">
+        <div className="card-header">
+           <h2>All Trips Today</h2>
+           <p>36 trips scheduled</p>
         </div>
         <div className="table-responsive">
-          <table className="trips-table">
+          <table className="data-table">
             <thead>
               <tr>
-                <th>Trip ID</th>
-                <th>Date</th>
-                <th>Route</th>
-                <th>Driver</th>
-                <th>Students Boarded</th>
-                <th>Status</th>
+                <th>TRIP ID</th>
+                <th>BUS</th>
+                <th>DRIVER</th>
+                <th>ROUTE</th>
+                <th>STUDENTS</th>
+                <th>START TIME</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {recentTrips.map(trip => (
-                <tr key={trip.id}>
-                  <td><strong>{trip.id}</strong></td>
-                  <td>{trip.date}</td>
-                  <td>{trip.route}</td>
-                  <td>{trip.driver}</td>
-                  <td>{trip.students}</td>
-                  <td>
-                    <span className="badge success"><CheckCircle2 size={14}/> {trip.status}</span>
-                  </td>
-                </tr>
-              ))}
+              <tr>
+                <td className="text-blue font-bold">TRIP-1024</td>
+                <td>RJ-14-AB-1234</td>
+                <td>Rajesh Kumar</td>
+                <td>SKIT → Jaipur</td>
+                <td>42</td>
+                <td>08:00 AM</td>
+                <td><span className="badge bg-green-light text-green">Active</span></td>
+                <td className="actions"><a href="#">View</a> <a href="#">Track</a></td>
+              </tr>
+              <tr>
+                <td className="text-blue font-bold">TRIP-1023</td>
+                <td>RJ-14-AB-1088</td>
+                <td>Suresh Meena</td>
+                <td>SKIT → Tonk Rd</td>
+                <td>38</td>
+                <td>08:05 AM</td>
+                <td><span className="badge bg-green-light text-green">Active</span></td>
+                <td className="actions"><a href="#">View</a> <a href="#">Track</a></td>
+              </tr>
+              <tr>
+                <td className="text-blue font-bold">TRIP-1022</td>
+                <td>RJ-14-AB-4512</td>
+                <td>Dinesh Yadav</td>
+                <td>SKIT → Mansarovar</td>
+                <td>31</td>
+                <td>07:55 AM</td>
+                <td><span className="badge bg-blue-light text-blue">Completed</span></td>
+                <td className="actions"><a href="#">View</a> <a href="#">Track</a></td>
+              </tr>
+              <tr>
+                <td className="text-blue font-bold">TRIP-1021</td>
+                <td>RJ-14-AB-1088</td>
+                <td>Suresh Meena</td>
+                <td>SKIT → Vaishali</td>
+                <td>44</td>
+                <td>07:45 AM</td>
+                <td><span className="badge bg-orange-light text-orange">Delayed</span></td>
+                <td className="actions"><a href="#">View</a> <a href="#">Track</a></td>
+              </tr>
+              <tr>
+                <td className="text-blue font-bold">TRIP-1020</td>
+                <td>RJ-14-AB-2231</td>
+                <td>Mohan Sharma</td>
+                <td>SKIT → C-Scheme</td>
+                <td>0</td>
+                <td>08:15 AM</td>
+                <td><span className="badge bg-red-light text-red">Cancelled</span></td>
+                <td className="actions"><a href="#">View</a> <a href="#">Track</a></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </section>
+    </div>
   );
-};
+}
 
 export default Dashboard;

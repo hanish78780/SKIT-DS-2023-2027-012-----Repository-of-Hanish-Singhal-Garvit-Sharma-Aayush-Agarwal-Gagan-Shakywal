@@ -1,21 +1,29 @@
 import React from 'react';
+import { Search, Bell } from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = ({ title = "Dashboard", subtitle = "Welcome to UniTransit Admin Panel" }) => {
+const Navbar = ({ title = "Transport Overview", subtitle = "SKIT Jaipur Campus Transportation" }) => {
   return (
     <header className="navbar">
-      <div>
+      <div className="navbar-left">
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
 
-      <div className="admin-profile">
-        <div className="profile-avatar">
-          A
+      <div className="navbar-right">
+        <div className="search-box">
+          <Search size={18} className="search-icon" />
+          <input type="text" placeholder="Search..." />
         </div>
-        <div>
-          <strong>Admin</strong>
-          <span>Administrator</span>
+        
+        <button className="notif-btn">
+          <Bell size={20} />
+          <span className="notif-badge">2</span>
+        </button>
+
+        <div className="campus-pill">
+          <span className="campus-dot"></span>
+          <span>SKIT Jaipur Campus</span>
         </div>
       </div>
     </header>
