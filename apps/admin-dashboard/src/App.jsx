@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
+import Students from "./pages/Students";
 import "./App.css";
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           {/* Future routes will go here */}
-          <Route path="students" element={<div style={{padding: '30px'}}><h2>Students Page (WIP)</h2></div>} />
+          <Route path="students" element={<Students />} />
           <Route path="drivers" element={<div style={{padding: '30px'}}><h2>Drivers Page (WIP)</h2></div>} />
           <Route path="buses" element={<div style={{padding: '30px'}}><h2>Buses Page (WIP)</h2></div>} />
           <Route path="routes" element={<div style={{padding: '30px'}}><h2>Routes Page (WIP)</h2></div>} />
