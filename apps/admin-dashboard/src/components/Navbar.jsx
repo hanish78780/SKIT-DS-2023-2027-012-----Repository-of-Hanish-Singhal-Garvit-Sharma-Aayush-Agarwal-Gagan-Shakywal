@@ -1,13 +1,18 @@
 import React from 'react';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = ({ title = "Transport Overview", subtitle = "SKIT Jaipur Campus Transportation" }) => {
+const Navbar = ({ title = "Transport Overview", subtitle = "SKIT Jaipur Campus Transportation", onMenuClick }) => {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
+        <button className="mobile-menu-btn" onClick={onMenuClick}>
+          <Menu size={24} />
+        </button>
+        <div>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
+        </div>
       </div>
 
       <div className="navbar-right">
