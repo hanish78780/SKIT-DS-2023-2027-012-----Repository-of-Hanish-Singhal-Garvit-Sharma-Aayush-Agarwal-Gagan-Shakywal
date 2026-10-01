@@ -2,27 +2,32 @@ import React from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
+import GpsCoordinatesCard from '../../components/GpsCoordinatesCard';
+import GpsStatusBadge from '../../components/GpsStatusBadge';
 import MapPlaceholder from '../../components/MapPlaceholder';
 import PrimaryButton from '../../components/PrimaryButton';
 import SecondaryButton from '../../components/SecondaryButton';
 import StatusBadge from '../../components/StatusBadge';
 import {mockBus, mockRoute, mockTripMetrics} from '../../constants/mockData';
-import {TripState} from '../../types/driver';
+import {LocationState, TripState} from '../../types/driver';
 import colors from '../../theme/colors';
 import {shadows} from '../../theme/tokens';
 
 interface ActiveTripScreenProps {
   tripState: TripState;
+  locationState: LocationState;
   onStopTrip: () => void;
   onNavigateToStudents: () => void;
 }
 
 const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
   tripState,
+  locationState,
   onStopTrip,
   onNavigateToStudents,
 }) => {
   const isStarted = tripState === 'TRIP_STARTED';
+  const isTracking = locationState.status === 'tracking';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,7 +45,24 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
             </View>
             <StatusBadge status={isStarted ? 'ACTIVE' : 'NOT_STARTED'} />
           </View>
+
+          {/* GPS Status Row */}
+          <View style={styles.gpsBadgeRow}>
+            <GpsStatusBadge status={locationState.status} />
+          </View>
+
+          {/* GPS error message */}
+          {locationState.errorMessage ? (
+            <Text style={styles.gpsErrorText} numberOfLines={3}>
+              ⚠ {locationState.errorMessage}
+            </Text>
+          ) : null}
         </View>
+
+        {/* Live GPS Coordinates (debug info) */}
+        {isTracking ? (
+          <GpsCoordinatesCard coordinates={locationState.coordinates} />
+        ) : null}
 
         {/* Live Vector Map Visual */}
         <MapPlaceholder
@@ -48,7 +70,9 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
           distanceKm={isStarted ? mockTripMetrics.distanceKm : 0}
           durationMins={isStarted ? mockTripMetrics.durationMinutes : 0}
           currentLocationName={
-            isStarted
+            isTracking && locationState.coordinates
+              ? `${locationState.coordinates.latitude.toFixed(4)}°N, ${locationState.coordinates.longitude.toFixed(4)}°E`
+              : isStarted
               ? mockTripMetrics.currentLocationName
               : 'Depot (SKIT Campus Main Parking)'
           }
@@ -98,7 +122,7 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
           />
         </View>
 
-        {/* Stop Trip Button */}
+        {/* Stop / Start Trip Button */}
         {isStarted ? (
           <PrimaryButton
             title="STOP TRIP & FINISH"
@@ -151,6 +175,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
     fontWeight: '500',
+  },
+  gpsBadgeRow: {
+    marginTop: 10,
+  },
+  gpsErrorText: {
+    color: colors.error,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 6,
+    lineHeight: 16,
   },
   card: {
     backgroundColor: colors.surface,

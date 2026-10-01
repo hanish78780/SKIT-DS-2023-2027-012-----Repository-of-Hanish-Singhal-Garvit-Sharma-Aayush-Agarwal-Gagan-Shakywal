@@ -12,6 +12,7 @@ import ActiveTripScreen from '../screens/trip/ActiveTripScreen';
 import TripSummaryModal from '../screens/trip/TripSummaryModal';
 import {TripState} from '../types/driver';
 import colors from '../theme/colors';
+import {useLocation} from '../hooks/useLocation';
 
 type ScreenState = 'SPLASH' | 'AUTH' | 'MAIN';
 
@@ -21,6 +22,9 @@ const AppNavigator: React.FC = () => {
   const [driverId, setDriverId] = useState<string>('DRV-001');
   const [tripState, setTripState] = useState<TripState>('NOT_STARTED');
   const [showTripSummaryModal, setShowTripSummaryModal] = useState<boolean>(false);
+
+  // GPS foreground location hook – shared across Dashboard and ActiveTrip
+  const {locationState, startTracking, stopTracking} = useLocation();
 
   const handleFinishSplash = () => {
     setScreenState('AUTH');
@@ -33,6 +37,8 @@ const AppNavigator: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // Stop GPS tracking when driver logs out
+    stopTracking();
     setTripState('NOT_STARTED');
     setScreenState('AUTH');
     setActiveTab('dashboard');
@@ -40,9 +46,13 @@ const AppNavigator: React.FC = () => {
 
   const handleToggleTrip = () => {
     if (tripState === 'NOT_STARTED') {
+      // Start trip → request GPS and navigate to ActiveTrip
       setTripState('TRIP_STARTED');
       setActiveTab('activeTrip');
+      startTracking();
     } else {
+      // Stop trip → stop GPS and show summary
+      stopTracking();
       setTripState('NOT_STARTED');
       setShowTripSummaryModal(true);
     }
@@ -55,6 +65,7 @@ const AppNavigator: React.FC = () => {
           <DriverDashboardScreen
             driverId={driverId}
             tripState={tripState}
+            locationState={locationState}
             onToggleTrip={handleToggleTrip}
             onLogout={handleLogout}
             onNavigateTab={tab => setActiveTab(tab)}
@@ -64,6 +75,7 @@ const AppNavigator: React.FC = () => {
         return (
           <ActiveTripScreen
             tripState={tripState}
+            locationState={locationState}
             onStopTrip={handleToggleTrip}
             onNavigateToStudents={() => setActiveTab('students')}
           />
@@ -79,6 +91,7 @@ const AppNavigator: React.FC = () => {
           <DriverDashboardScreen
             driverId={driverId}
             tripState={tripState}
+            locationState={locationState}
             onToggleTrip={handleToggleTrip}
             onLogout={handleLogout}
             onNavigateTab={tab => setActiveTab(tab)}

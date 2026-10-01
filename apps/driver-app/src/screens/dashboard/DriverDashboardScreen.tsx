@@ -4,15 +4,17 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
 import BusCard from '../../components/BusCard';
 import DriverProfileCard from '../../components/DriverProfileCard';
+import GpsStatusBadge from '../../components/GpsStatusBadge';
 import RouteCard from '../../components/RouteCard';
 import TripStatusCard from '../../components/TripStatusCard';
 import {mockBus, mockDriver, mockRoute} from '../../constants/mockData';
-import {TripState} from '../../types/driver';
+import {LocationState, TripState} from '../../types/driver';
 import colors from '../../theme/colors';
 
 interface DriverDashboardScreenProps {
   driverId: string;
   tripState: TripState;
+  locationState: LocationState;
   onToggleTrip: () => void;
   onLogout: () => void;
   onNavigateTab: (tab: 'activeTrip' | 'students' | 'notifications' | 'profile') => void;
@@ -21,10 +23,13 @@ interface DriverDashboardScreenProps {
 const DriverDashboardScreen: React.FC<DriverDashboardScreenProps> = ({
   driverId,
   tripState,
+  locationState,
   onToggleTrip,
   onLogout,
   onNavigateTab,
 }) => {
+  const isTripActive = tripState === 'TRIP_STARTED';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppHeader
@@ -43,9 +48,21 @@ const DriverDashboardScreen: React.FC<DriverDashboardScreenProps> = ({
             Good morning, {mockDriver.name.split(' ')[0]} 👋
           </Text>
           <Text style={styles.greetingSubtitle}>
-            Have a safe & punctual shift today!
+            Have a safe &amp; punctual shift today!
           </Text>
         </View>
+
+        {/* GPS Status – shown when a trip is active */}
+        {isTripActive && (
+          <View style={styles.gpsRow}>
+            <GpsStatusBadge status={locationState.status} />
+            {locationState.errorMessage ? (
+              <Text style={styles.gpsErrorText} numberOfLines={2}>
+                {locationState.errorMessage}
+              </Text>
+            ) : null}
+          </View>
+        )}
 
         {/* Driver Info Profile Card */}
         <DriverProfileCard
@@ -111,6 +128,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     marginTop: 2,
+  },
+  gpsRow: {
+    marginBottom: 12,
+    gap: 6,
+  },
+  gpsErrorText: {
+    color: colors.error,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
   },
   footerNote: {
     textAlign: 'center',
