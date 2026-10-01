@@ -3,20 +3,27 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-
+import PrimaryButton from '../../components/PrimaryButton';
 import colors from '../../theme/colors';
+import {shadows} from '../../theme/tokens';
 
-const LoginScreen = () => {
-  const [driverId, setDriverId] = useState('');
-  const [password, setPassword] = useState('');
+interface LoginScreenProps {
+  onLoginSuccess: (driverId: string) => void;
+}
+
+const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
+  const [driverId, setDriverId] = useState('DRV-001');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
     const trimmedDriverId = driverId.trim();
@@ -27,7 +34,12 @@ const LoginScreen = () => {
     }
 
     setError('');
-    console.log('Driver login submitted', {driverId: trimmedDriverId});
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      onLoginSuccess(trimmedDriverId);
+    }, 500);
   };
 
   return (
@@ -35,19 +47,29 @@ const LoginScreen = () => {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          {/* Header Branding */}
           <View style={styles.header}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoText}>U</Text>
+            <View style={styles.skitBadgeContainer}>
+              <View style={styles.skitBadgeInner}>
+                <Text style={styles.skitBadgeText}>SKIT</Text>
+                <Text style={styles.skitBadgeSubtext}>JAIPUR</Text>
+              </View>
             </View>
             <Text style={styles.appName}>UniTransit</Text>
+            <Text style={styles.collegeName}>
+              Swami Keshvanand Institute of Technology
+            </Text>
             <Text style={styles.subtitle}>Driver Portal</Text>
           </View>
 
-          <View style={styles.card}>
-            <Text style={styles.title}>Welcome back</Text>
+          {/* Form Card */}
+          <View style={[styles.card, shadows.medium]}>
+            <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.description}>
-              Sign in to manage your assigned bus and trips.
+              Sign in to manage your assigned campus bus & live trips.
             </Text>
 
             <Text style={styles.label}>Driver ID</Text>
@@ -57,8 +79,8 @@ const LoginScreen = () => {
                 setDriverId(value);
                 if (error) setError('');
               }}
-              placeholder="Enter your driver ID"
-              placeholderTextColor={colors.textSecondary}
+              placeholder="e.g. DRV-001"
+              placeholderTextColor={colors.textMuted}
               autoCapitalize="characters"
               autoCorrect={false}
               style={styles.input}
@@ -73,7 +95,7 @@ const LoginScreen = () => {
                   if (error) setError('');
                 }}
                 placeholder="Enter your password"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 style={styles.passwordInput}
@@ -90,29 +112,25 @@ const LoginScreen = () => {
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Login"
+            <PrimaryButton
+              title="Sign In"
               onPress={handleLogin}
-              style={({pressed}) => [
-                styles.loginButton,
-                pressed && styles.loginButtonPressed,
-              ]}>
-              <Text style={styles.loginButtonText}>Login</Text>
-            </Pressable>
+              loading={loading}
+              style={styles.loginBtn}
+            />
 
             <Pressable
               accessibilityRole="button"
-              onPress={() => console.log('Forgot password pressed')}
+              onPress={() => setError('Please contact SKIT Transport Cell to reset password.')}
               style={styles.forgotButton}>
               <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
           </View>
 
           <Text style={styles.footerText}>
-            Need access? Contact the transport administrator.
+            Authorized Transport Personnel Only • SKIT Jaipur
           </Text>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -126,82 +144,111 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 30,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 24,
   },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  skitBadgeContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: colors.skitMaroon,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
     marginBottom: 12,
+    elevation: 4,
+    shadowColor: colors.cardShadow,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.skitGold,
   },
-  logoText: {
+  skitBadgeInner: {
+    alignItems: 'center',
+  },
+  skitBadgeText: {
     color: colors.white,
-    fontSize: 30,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  skitBadgeSubtext: {
+    color: colors.skitGold,
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginTop: -2,
   },
   appName: {
     color: colors.text,
     fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+  },
+  collegeName: {
+    color: colors.primary,
+    fontSize: 12,
     fontWeight: '700',
+    marginTop: 2,
+    textAlign: 'center',
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 3,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 2,
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 22,
+    padding: 24,
   },
   title: {
     color: colors.text,
-    fontSize: 23,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
   },
   description: {
     color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    marginBottom: 22,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4,
+    marginBottom: 20,
   },
   label: {
     color: colors.text,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   input: {
-    height: 50,
+    height: 48,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: colors.background,
     paddingHorizontal: 14,
     color: colors.text,
-    fontSize: 15,
-    marginBottom: 18,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 16,
   },
   passwordRow: {
-    height: 50,
+    height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: colors.background,
   },
   passwordInput: {
@@ -209,50 +256,41 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: 14,
     color: colors.text,
-    fontSize: 15,
+    fontSize: 14,
+    fontWeight: '600',
   },
   showButton: {
     paddingHorizontal: 14,
   },
   showText: {
     color: colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 13,
   },
   errorText: {
     color: colors.error,
     fontSize: 13,
     marginTop: 10,
+    fontWeight: '600',
   },
-  loginButton: {
-    height: 52,
-    borderRadius: 10,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+  loginBtn: {
     marginTop: 22,
-  },
-  loginButtonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
-  loginButtonText: {
-    color: colors.white,
-    fontSize: 15,
-    fontWeight: '700',
   },
   forgotButton: {
     alignSelf: 'center',
-    paddingVertical: 16,
+    paddingVertical: 14,
   },
   forgotText: {
     color: colors.primary,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footerText: {
-    color: colors.textSecondary,
+    color: colors.textMuted,
     fontSize: 12,
     textAlign: 'center',
-    marginTop: 18,
+    marginTop: 24,
+    fontWeight: '500',
   },
 });
 
