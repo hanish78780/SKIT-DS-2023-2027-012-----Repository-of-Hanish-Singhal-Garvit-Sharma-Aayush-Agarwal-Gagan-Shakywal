@@ -1,6 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Network access -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        Foreground GPS permissions for Driver App trip tracking.
+        ACCESS_FINE_LOCATION  – precise GPS position (required for turn-by-turn accuracy)
+        ACCESS_COARSE_LOCATION – fallback when GPS unavailable (network-based location)
+        FOREGROUND_SERVICE     – required to run a foreground service during an active trip
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
       android:name=".MainApplication"
