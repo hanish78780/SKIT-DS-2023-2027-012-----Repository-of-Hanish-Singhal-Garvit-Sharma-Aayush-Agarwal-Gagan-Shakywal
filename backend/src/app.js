@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import authRoutes from "./routes/authRoutes.js";
-
+import studentRoutes from "./routes/studentRoutes.js";
 const app = express();
 
 app.use(helmet());
@@ -29,5 +29,6 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/students", studentRoutes);
 
 export default app;
