@@ -17,6 +17,9 @@ const Layout = () => {
   } else if (location.pathname.includes('/students')) {
     title = "Student Management";
     subtitle = "1,240 enrolled students";
+  } else if (location.pathname.includes('/drivers')) {
+    title = "Driver Management";
+    subtitle = "All registered drivers";
   }
 
   return (
