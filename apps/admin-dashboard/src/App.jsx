@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Drivers from "./pages/Drivers";
+import Buses from "./pages/Buses";
 import "./App.css";
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
           {/* Future routes will go here */}
           <Route path="students" element={<Students />} />
           <Route path="drivers" element={<Drivers />} />
-          <Route path="buses" element={<div style={{padding: '30px'}}><h2>Buses Page (WIP)</h2></div>} />
+          <Route path="buses" element={<Buses />} />
           <Route path="routes" element={<div style={{padding: '30px'}}><h2>Routes Page (WIP)</h2></div>} />
           <Route path="trips" element={<div style={{padding: '30px'}}><h2>Trips Page (WIP)</h2></div>} />
           <Route path="reports" element={<div style={{padding: '30px'}}><h2>Reports Page (WIP)</h2></div>} />

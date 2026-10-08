@@ -204,7 +204,7 @@
 .app-titles p {
   margin: 0;
   font-size: 0.75rem;
-  color: #64748b;
+  color: #64748b !important;
 }
 
 .login-title {
@@ -219,7 +219,7 @@
 }
 
 .login-title p {
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
   font-size: 0.9rem;
 }
@@ -256,7 +256,7 @@
 }
 
 .form-group input:focus {
-  border-color: #2563eb;
+  border-color: #2563eb !important;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -303,11 +303,11 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  color: #64748b;
+  color: #64748b !important;
 }
 
 .forgot-password {
-  color: #2563eb;
+  color: #2563eb !important;
   text-decoration: none;
   font-weight: 600;
 }

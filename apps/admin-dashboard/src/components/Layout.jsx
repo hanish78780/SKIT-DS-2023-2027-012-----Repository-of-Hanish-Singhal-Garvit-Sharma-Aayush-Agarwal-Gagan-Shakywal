@@ -20,6 +20,9 @@ const Layout = () => {
   } else if (location.pathname.includes('/drivers')) {
     title = "Driver Management";
     subtitle = "All registered drivers";
+  } else if (location.pathname.includes('/buses')) {
+    title = "Bus Management";
+    subtitle = "All registered buses · SKIT Fleet";
   }
 
   return (
