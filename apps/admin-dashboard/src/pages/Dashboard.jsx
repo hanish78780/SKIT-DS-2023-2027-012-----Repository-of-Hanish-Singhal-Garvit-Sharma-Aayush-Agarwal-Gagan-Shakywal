@@ -57,23 +57,26 @@ const Dashboard = () => {
             </div>
             <div className="map-area">
                <svg className="map-svg" viewBox="0 0 800 400" preserveAspectRatio="none">
-                 <path d="M 150 300 Q 350 150, 500 100" stroke="#2563eb" strokeWidth="4" strokeDasharray="8 8" fill="none" />
-                 <path d="M 150 300 Q 400 350, 450 320" stroke="#991b1b" strokeWidth="4" strokeDasharray="8 8" fill="none" />
+                 <rect x="10%" y="0" width="5%" height="100%" fill="#ffffff" />
+                 <rect x="35%" y="0" width="5%" height="100%" fill="#ffffff" />
+                 <rect x="60%" y="0" width="5%" height="100%" fill="#ffffff" />
+                 <path d="M 120 280 Q 250 120, 450 50" stroke="#2563eb" strokeWidth="4" strokeDasharray="8 8" fill="none" />
+                 <path d="M 120 280 Q 300 320, 450 280" stroke="#991b1b" strokeWidth="4" strokeDasharray="8 8" fill="none" />
                </svg>
-               <div className="marker skit-marker" style={{ top: '300px', left: '150px' }}>
+               <div className="marker skit-marker" style={{ top: '70%', left: '15%' }}>
                  <span className="dot bg-red"></span> SKIT
                </div>
-               <div className="marker bus-marker" style={{ top: '230px', left: '260px' }}>
+               <div className="marker bus-marker" style={{ top: '48%', left: '27.5%' }}>
                  <div className="bus-icon bg-blue"><Bus size={14}/></div>
-                 <span>-1234</span>
+                 <div className="marker-label">-1234</div>
                </div>
-               <div className="marker bus-marker" style={{ top: '150px', left: '380px' }}>
+               <div className="marker bus-marker" style={{ top: '23%', left: '43.75%' }}>
                  <div className="bus-icon bg-blue"><Bus size={14}/></div>
-                 <span>-1088</span>
+                 <div className="marker-label">-1088</div>
                </div>
-               <div className="marker bus-marker" style={{ top: '330px', left: '420px' }}>
+               <div className="marker bus-marker" style={{ top: '74%', left: '41.25%' }}>
                  <div className="bus-icon bg-gray"><Bus size={14}/></div>
-                 <span>-4512</span>
+                 <div className="marker-label">-4512</div>
                </div>
 
                <div className="map-info-box">
@@ -102,7 +105,7 @@ const Dashboard = () => {
                     <p>RJ-14-AB-1234 · Rajesh Kumar</p>
                     <p className="feed-route">SKIT → Jaipur · 42 students</p>
                   </div>
-                  <div className="feed-status bg-green-light text-green">Active</div>
+                  <div><span className="badge bg-green-light text-green">Active</span></div>
                 </div>
                 <div className="feed-divider"></div>
                 <div className="feed-item">
@@ -111,7 +114,7 @@ const Dashboard = () => {
                     <p>RJ-14-AB-1088 · Suresh Meena</p>
                     <p className="feed-route">SKIT → Tonk Rd · 38 students</p>
                   </div>
-                  <div className="feed-status bg-green-light text-green">Active</div>
+                  <div><span className="badge bg-green-light text-green">Active</span></div>
                 </div>
              </div>
           </div>

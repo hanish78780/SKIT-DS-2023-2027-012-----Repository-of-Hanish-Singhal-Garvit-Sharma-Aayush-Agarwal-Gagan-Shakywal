@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <strong>Admin User</strong>
             <span>Super Admin</span>
           </div>
-          <button className="logout-btn">
+          <button className="logout-btn" onClick={() => window.location.reload()}>
             <LogOut size={18} />
           </button>
         </div>

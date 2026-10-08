@@ -20,23 +20,24 @@
 }
 
 .summary-card h2 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
   margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
 }
 
 .summary-card p {
   font-size: 13px;
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
   font-weight: 500;
 }
 
 /* Colors */
-.text-blue-primary { color: #2563eb; }
-.text-green-primary { color: #16a34a; }
+.text-blue-primary { color: #2563eb !important; }
+.text-green-primary { color: #16a34a !important; }
 .text-purple-primary { color: #7c3aed; }
-.text-orange-primary { color: #ea580c; }
+.text-orange-primary { color: #ea580c !important; }
 .text-gray-light { color: #94a3b8; }
 
 /* Directory Card */
@@ -65,7 +66,7 @@
 
 .dir-title p {
   font-size: 12px;
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
 }
 
@@ -128,7 +129,7 @@
   position: absolute;
   right: 10px;
   pointer-events: none;
-  color: #64748b;
+  color: #64748b !important;
 }
 
 /* Table */
@@ -158,8 +159,8 @@
 .bg-green-light { background: #f0fdf4; }
 .bg-orange-light { background: #fff7ed; }
 
-.text-green { color: #16a34a; }
-.text-orange { color: #ea580c; }
+.text-green { color: #16a34a !important; }
+.text-orange { color: #ea580c !important; }
 
 @media (max-width: 1000px) {
   .students-summary-grid {

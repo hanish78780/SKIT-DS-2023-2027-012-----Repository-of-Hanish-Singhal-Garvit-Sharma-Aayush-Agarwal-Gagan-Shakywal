@@ -11,7 +11,7 @@
 }
 .dashboard-wrapper p {
   font-size: 13px;
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
 }
 
@@ -64,7 +64,7 @@
 }
 .stat-info p {
   font-size: 12px;
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
 }
 .trend-green {
@@ -82,11 +82,11 @@
 .bg-orange-light { background: #fff7ed; }
 .bg-purple-light { background: #faf5ff; }
 
-.text-blue { color: #3b82f6; }
+.text-blue { color: #3b82f6 !important; }
 .text-green { color: #22c55e; }
-.text-red { color: #ef4444; }
+.text-red { color: #ef4444 !important; }
 .text-orange { color: #f97316; }
-.text-orange-dark { color: #ea580c; }
+.text-orange-dark { color: #ea580c !important; }
 .text-purple { color: #a855f7; }
 
 /* Grid Layout */
@@ -107,11 +107,13 @@
   flex: 1;
   min-height: 350px;
   background-color: #f8fafc;
-  background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+  background-image: repeating-linear-gradient(#e2e8f0 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, #e2e8f0 0 1px, transparent 1px 100%);
   background-size: 40px 40px;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid #e2e8f0;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin: 0 24px 24px 24px;
 }
 .map-svg {
   position: absolute;
@@ -127,6 +129,12 @@
   font-size: 11px;
   font-weight: 700;
   color: #1e293b;
+}
+.skit-marker {
+  background: white !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
 }
 .skit-marker .dot {
   width: 8px;
@@ -149,6 +157,20 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  border: 2px solid white;
+  z-index: 2;
+}
+
+.marker-label {
+  background: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1e293b;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: -6px;
+  z-index: 3;
 }
 .bg-blue { background: #3b82f6; }
 .bg-gray { background: #94a3b8; }
@@ -166,7 +188,7 @@
   border: 1px solid #e2e8f0;
 }
 .map-info-box strong { font-size: 13px; color: #0f172a; }
-.map-info-box span { font-size: 11px; color: #64748b; margin-top: 2px;}
+.map-info-box span { font-size: 11px; color: #64748b !important; margin-top: 2px;}
 
 /* Active Trips Feed */
 .live-indicator {
@@ -238,7 +260,7 @@
 }
 .summary-card p {
   font-size: 12px;
-  color: #64748b;
+  color: #64748b !important;
   margin: 0;
 }
 
@@ -259,7 +281,7 @@
 .data-table th {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #64748b !important;
   text-transform: uppercase;
   background: #f8fafc;
   letter-spacing: 0.5px;
@@ -276,7 +298,7 @@
   font-weight: 700;
 }
 .actions a {
-  color: #2563eb;
+  color: #2563eb !important;
   text-decoration: none;
   font-size: 12px;
   font-weight: 600;
