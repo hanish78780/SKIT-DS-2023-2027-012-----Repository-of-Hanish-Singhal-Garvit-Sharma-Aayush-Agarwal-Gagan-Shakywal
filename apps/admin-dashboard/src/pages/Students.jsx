@@ -1,17 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, X, User, Bus, MapPin, CheckCircle } from 'lucide-react';
+import { useTransport } from '../context/TransportContext';
 import './Students.css';
 
-const initialStudentsData = [
-  { id: '23CSE101', name: 'Aarav Sharma', initial: 'A', course: 'B.Tech CSE', year: '3rd Year', stop: 'Stop 03', route: 'Route 03', bus: 'RJ-14-AB-1234', status: 'Active' },
-  { id: '23CSE204', name: 'Priya Verma', initial: 'P', course: 'B.Tech CSE', year: '3rd Year', stop: 'Stop 02', route: 'Route 03', bus: 'RJ-14-AB-1234', status: 'Active' },
-  { id: '23ME105', name: 'Rahul Singh', initial: 'R', course: 'B.Tech ME', year: '2nd Year', stop: 'Stop 05', route: 'Route 01', bus: 'RJ-14-AB-1088', status: 'Active' },
-  { id: '23EE302', name: 'Neha Gupta', initial: 'N', course: 'B.Tech EE', year: '3rd Year', stop: 'Stop 01', route: 'Route 02', bus: '—', status: 'Unassigned' },
-  { id: '23CE201', name: 'Arjun Mehta', initial: 'A', course: 'B.Tech CE', year: '1st Year', stop: 'Stop 04', route: 'Route 04', bus: 'RJ-14-AB-4512', status: 'Active' },
-];
-
 const Students = () => {
-  const [studentsList, setStudentsList] = useState(initialStudentsData);
+  const { students: studentsList, buses, updateStudent, unassignStudent } = useTransport();
   const [selectedRoute, setSelectedRoute] = useState('All Routes');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -27,6 +20,34 @@ const Students = () => {
     bus: '',
     status: 'Active',
   });
+
+  // Dynamically extract all assigned routes from the student list
+  const assignedRoutes = Array.from(
+    new Set(
+      studentsList
+        .map((s) => s.route)
+        .filter((r) => r && r.trim() !== '' && r !== '—')
+    )
+  ).sort();
+
+  // Combine default routes with any custom/assigned routes for the assign modal
+  const allAvailableRoutes = Array.from(
+    new Set([
+      'Route 01',
+      'Route 02',
+      'Route 03',
+      'Route 04',
+      'Route 05',
+      ...assignedRoutes,
+    ])
+  ).sort();
+
+  // Reset selected route if it no longer exists in assigned routes
+  useEffect(() => {
+    if (selectedRoute !== 'All Routes' && !assignedRoutes.includes(selectedRoute)) {
+      setSelectedRoute('All Routes');
+    }
+  }, [assignedRoutes, selectedRoute]);
 
   const filteredStudents = studentsList.filter((student) => {
     const matchesRoute = selectedRoute === 'All Routes' || student.route === selectedRoute;
@@ -82,23 +103,16 @@ const Students = () => {
     e.preventDefault();
     if (!currentStudent) return;
 
-    setStudentsList((prev) =>
-      prev.map((s) =>
-        s.id === currentStudent.id
-          ? {
-              ...s,
-              name: formData.name,
-              initial: formData.name.charAt(0).toUpperCase() || s.initial,
-              course: formData.course,
-              year: formData.year,
-              stop: formData.stop,
-              route: formData.route,
-              bus: formData.bus,
-              status: formData.status,
-            }
-          : s
-      )
-    );
+    updateStudent(currentStudent.id, {
+      name: formData.name,
+      initial: formData.name.charAt(0).toUpperCase() || currentStudent.initial,
+      course: formData.course,
+      year: formData.year,
+      stop: formData.stop,
+      route: formData.route,
+      bus: formData.bus,
+      status: formData.status,
+    });
     handleCloseModal();
   };
 
@@ -106,38 +120,19 @@ const Students = () => {
     e.preventDefault();
     if (!currentStudent) return;
 
-    setStudentsList((prev) =>
-      prev.map((s) =>
-        s.id === currentStudent.id
-          ? {
-              ...s,
-              route: formData.route,
-              stop: formData.stop,
-              bus: formData.bus,
-              status: 'Active',
-            }
-          : s
-      )
-    );
+    updateStudent(currentStudent.id, {
+      route: formData.route,
+      stop: formData.stop,
+      bus: formData.bus,
+      status: 'Active',
+    });
     handleCloseModal();
   };
 
   const handleUnassign = () => {
     if (!currentStudent) return;
 
-    setStudentsList((prev) =>
-      prev.map((s) =>
-        s.id === currentStudent.id
-          ? {
-              ...s,
-              route: '—',
-              stop: '—',
-              bus: '—',
-              status: 'Unassigned',
-            }
-          : s
-      )
-    );
+    unassignStudent(currentStudent.id);
     handleCloseModal();
   };
 
@@ -187,10 +182,9 @@ const Students = () => {
                 onChange={(e) => setSelectedRoute(e.target.value)}
               >
                 <option value="All Routes">All Routes</option>
-                <option value="Route 01">Route 01</option>
-                <option value="Route 02">Route 02</option>
-                <option value="Route 03">Route 03</option>
-                <option value="Route 04">Route 04</option>
+                {assignedRoutes.map((route) => (
+                  <option key={route} value={route}>{route}</option>
+                ))}
               </select>
               <ChevronDown size={16} className="dropdown-icon" />
             </div>
@@ -373,19 +367,27 @@ const Students = () => {
                   </div>
                   <div className="form-group">
                     <label>Route</label>
-                    <input 
-                      type="text" 
+                    <select 
                       value={formData.route} 
                       onChange={(e) => setFormData({ ...formData, route: e.target.value })} 
-                    />
+                    >
+                      <option value="—">Unassigned (—)</option>
+                      {allAvailableRoutes.map((route) => (
+                        <option key={route} value={route}>{route}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label>Bus Number</label>
-                    <input 
-                      type="text" 
+                    <select 
                       value={formData.bus} 
                       onChange={(e) => setFormData({ ...formData, bus: e.target.value })} 
-                    />
+                    >
+                      <option value="—">Unassigned (—)</option>
+                      {buses.map((b) => (
+                        <option key={b.id} value={b.id}>{b.id} ({b.type})</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group full-width">
                     <label>Stop Name</label>
@@ -440,10 +442,9 @@ const Students = () => {
                       value={formData.route} 
                       onChange={(e) => setFormData({ ...formData, route: e.target.value })}
                     >
-                      <option value="Route 01">Route 01 (Malviya Nagar - Tonk Rd)</option>
-                      <option value="Route 02">Route 02 (Mansarovar - Gopalpura)</option>
-                      <option value="Route 03">Route 03 (Vaishali Nagar - Ajmer Rd)</option>
-                      <option value="Route 04">Route 04 (Jagatpura - SKIT Direct)</option>
+                      {allAvailableRoutes.map((route) => (
+                        <option key={route} value={route}>{route}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -464,13 +465,12 @@ const Students = () => {
                   <div className="form-group">
                     <label>Assigned Bus</label>
                     <select 
-                      value={formData.bus === '—' ? 'RJ-14-AB-1234' : formData.bus} 
+                      value={formData.bus === '—' ? (buses[0]?.id || 'RJ-14-AB-1234') : formData.bus} 
                       onChange={(e) => setFormData({ ...formData, bus: e.target.value })}
                     >
-                      <option value="RJ-14-AB-1234">RJ-14-AB-1234 (Bus 01)</option>
-                      <option value="RJ-14-AB-1088">RJ-14-AB-1088 (Bus 02)</option>
-                      <option value="RJ-14-AB-4512">RJ-14-AB-4512 (Bus 03)</option>
-                      <option value="RJ-14-AB-2231">RJ-14-AB-2231 (Bus 04)</option>
+                      {buses.map((b) => (
+                        <option key={b.id} value={b.id}>{b.id} ({b.type})</option>
+                      ))}
                     </select>
                   </div>
                 </div>

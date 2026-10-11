@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
 import { Bus, UserRound, Users, Clock, X, Navigation, Phone, CheckCircle, Radio } from 'lucide-react';
+import { useTransport } from '../context/TransportContext';
 import './Dashboard.css';
 
-const initialTripsData = [
-  { id: 'TRIP-1024', bus: 'RJ-14-AB-1234', driver: 'Rajesh Kumar', phone: '98765 43210', route: 'SKIT → Jaipur', students: 42, startTime: '08:00 AM', status: 'Active', speed: '38 km/h', eta: '12 mins', nextStop: 'Tonk Phatak' },
-  { id: 'TRIP-1023', bus: 'RJ-14-AB-1088', driver: 'Suresh Meena', phone: '97654 32109', route: 'SKIT → Tonk Rd', students: 38, startTime: '08:05 AM', status: 'Active', speed: '42 km/h', eta: '18 mins', nextStop: 'Gopalpura' },
-  { id: 'TRIP-1022', bus: 'RJ-14-AB-4512', driver: 'Dinesh Yadav', phone: '95432 10987', route: 'SKIT → Mansarovar', students: 31, startTime: '07:55 AM', status: 'Completed', speed: '0 km/h', eta: 'Arrived', nextStop: 'Trip Completed' },
-  { id: 'TRIP-1021', bus: 'RJ-14-AB-1088', driver: 'Suresh Meena', phone: '97654 32109', route: 'SKIT → Vaishali', students: 44, startTime: '07:45 AM', status: 'Delayed', speed: '24 km/h', eta: '25 mins', nextStop: 'Ajmer Flyover' },
-  { id: 'TRIP-1020', bus: 'RJ-14-AB-2231', driver: 'Mohan Sharma', phone: '96543 21098', route: 'SKIT → C-Scheme', students: 0, startTime: '08:15 AM', status: 'Cancelled', speed: '0 km/h', eta: 'Cancelled', nextStop: '—' },
-];
-
 const Dashboard = () => {
-  const [tripsList, setTripsList] = useState(initialTripsData);
+  const { trips: tripsList, buses, drivers, students } = useTransport();
   const [modalType, setModalType] = useState(null); // 'view' | 'track' | null
   const [selectedTrip, setSelectedTrip] = useState(null);
 

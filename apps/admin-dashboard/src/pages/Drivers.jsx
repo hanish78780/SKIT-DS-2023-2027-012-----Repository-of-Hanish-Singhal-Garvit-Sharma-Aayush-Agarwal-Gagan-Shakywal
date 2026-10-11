@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Plus, X, Phone, User, Bus, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useTransport } from '../context/TransportContext';
 import './Drivers.css';
 
-const initialDriversData = [
-  { id: 'DRV-001', name: 'Rajesh Kumar', initial: 'R', phone: '98765 43210', bus: 'RJ-14-AB-1234', route: 'Route 03', trip: 'TRIP-1024', status: 'Online', license: 'RJ14-2018-0912' },
-  { id: 'DRV-002', name: 'Suresh Meena', initial: 'S', phone: '97654 32109', bus: 'RJ-14-AB-1088', route: 'Route 01', trip: 'TRIP-1022', status: 'Online', license: 'RJ14-2019-4410' },
-  { id: 'DRV-003', name: 'Mohan Sharma', initial: 'M', phone: '96543 21098', bus: 'RJ-14-AB-2231', route: 'Route 02', trip: '—', status: 'Available', license: 'RJ14-2021-1289' },
-  { id: 'DRV-004', name: 'Dinesh Yadav', initial: 'D', phone: '95432 10987', bus: 'RJ-14-AB-4512', route: 'Route 04', trip: 'TRIP-1026', status: 'Online', license: 'RJ14-2017-7731' },
-  { id: 'DRV-005', name: 'Ramesh Verma', initial: 'R', phone: '94321 09876', bus: '—', route: '—', trip: '—', status: 'On Leave', license: 'RJ14-2020-5623' },
-];
-
 const Drivers = () => {
-  const [driversList, setDriversList] = useState(initialDriversData);
+  const { 
+    drivers: driversList, 
+    assignDriver, 
+    unassignDriver, 
+    toggleDriverDisabled, 
+    addDriver 
+  } = useTransport();
+
   const [modalType, setModalType] = useState(null); // 'profile' | 'assign' | 'disable' | 'add' | null
   const [currentDriver, setCurrentDriver] = useState(null);
 
@@ -69,56 +69,25 @@ const Drivers = () => {
     e.preventDefault();
     if (!currentDriver) return;
 
-    setDriversList((prev) =>
-      prev.map((d) =>
-        d.id === currentDriver.id
-          ? {
-              ...d,
-              bus: formData.bus,
-              route: formData.route,
-              trip: formData.trip,
-              status: 'Online',
-            }
-          : d
-      )
-    );
+    assignDriver(currentDriver.id, {
+      bus: formData.bus,
+      route: formData.route,
+      trip: formData.trip,
+    });
     handleCloseModal();
   };
 
   const handleUnassignDriver = () => {
     if (!currentDriver) return;
 
-    setDriversList((prev) =>
-      prev.map((d) =>
-        d.id === currentDriver.id
-          ? {
-              ...d,
-              bus: '—',
-              route: '—',
-              trip: '—',
-              status: 'Available',
-            }
-          : d
-      )
-    );
+    unassignDriver(currentDriver.id);
     handleCloseModal();
   };
 
   const handleConfirmToggleDisable = () => {
     if (!currentDriver) return;
 
-    setDriversList((prev) =>
-      prev.map((d) =>
-        d.id === currentDriver.id
-          ? {
-              ...d,
-              status: d.status === 'Disabled' ? 'Available' : 'Disabled',
-              bus: d.status === 'Disabled' ? d.bus : '—',
-              trip: d.status === 'Disabled' ? d.trip : '—',
-            }
-          : d
-      )
-    );
+    toggleDriverDisabled(currentDriver.id);
     handleCloseModal();
   };
 
@@ -148,7 +117,7 @@ const Drivers = () => {
       trip: formData.trip || '—',
       status: formData.status,
     };
-    setDriversList([...driversList, newDriver]);
+    addDriver(newDriver);
     handleCloseModal();
   };
 
@@ -396,6 +365,7 @@ const Drivers = () => {
                       <option value="Route 02">Route 02 (Mansarovar)</option>
                       <option value="Route 03">Route 03 (Vaishali Nagar)</option>
                       <option value="Route 04">Route 04 (Jagatpura)</option>
+                      <option value="Route 05">Route 05 (Ajmer Road)</option>
                     </select>
                   </div>
 
@@ -564,6 +534,7 @@ const Drivers = () => {
                       <option value="Route 02">Route 02</option>
                       <option value="Route 03">Route 03</option>
                       <option value="Route 04">Route 04</option>
+                      <option value="Route 05">Route 05</option>
                     </select>
                   </div>
                 </div>
