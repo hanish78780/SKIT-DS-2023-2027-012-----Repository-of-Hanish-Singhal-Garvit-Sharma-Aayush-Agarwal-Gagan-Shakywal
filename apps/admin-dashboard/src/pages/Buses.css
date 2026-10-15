@@ -239,3 +239,129 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.actions button, .actions a {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  font-family: inherit;
+  color: #2563eb !important;
+  transition: all 0.15s ease-in-out;
+}
+
+.actions button:hover, .actions a:hover {
+  color: #1d4ed8 !important;
+  text-decoration: underline;
+}
+
+.actions button.action-resume {
+  color: #16a34a !important;
+}
+
+.btn-danger {
+  flex: 1;
+  padding: 12px;
+  background: #ea580c;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-danger:hover {
+  background: #c2410c;
+}
+
+.btn-unassign {
+  padding: 10px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #ef4444 !important;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-unassign:hover {
+  background: #fee2e2;
+  color: #dc2626 !important;
+}
+
+/* View Bus Card */
+.view-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.view-avatar-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-profile-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.view-profile-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b !important;
+}
+
+.view-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item span.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-item span.value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
