@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, BackHandler } from 'react-native';
 import colors from '../theme/colors';
 import shadows from '../theme/shadows';
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -17,9 +17,32 @@ export type MainTab = 'Home' | 'Track' | 'Route' | 'Notifications' | 'Profile';
 export type ActiveScreen = MainTab | 'BusDetails' | 'ReportIssue' | 'Help' | 'Settings';
 
 export const AppNavigator: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>('Home');
   const [activeTab, setActiveTab] = useState<MainTab>('Home');
+  const isMainTab = ['Home', 'Track', 'Route', 'Notifications', 'Profile'].includes(
+    activeScreen
+  );
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!isAuthenticated) {
+        return false;
+      }
+      if (!isMainTab) {
+        setActiveScreen(activeTab);
+        return true;
+      }
+      if (activeTab !== 'Home') {
+        setActiveTab('Home');
+        setActiveScreen('Home');
+        return true;
+      }
+      return false;
+    });
+
+    return () => subscription.remove();
+  }, [activeScreen, activeTab, isAuthenticated, isMainTab]);
 
   const handleSelectTab = (tab: MainTab) => {
     setActiveTab(tab);
@@ -91,10 +114,6 @@ export const AppNavigator: React.FC = () => {
         );
     }
   };
-
-  const isMainTab = ['Home', 'Track', 'Route', 'Notifications', 'Profile'].includes(
-    activeScreen
-  );
 
   return (
     <View style={styles.container}>

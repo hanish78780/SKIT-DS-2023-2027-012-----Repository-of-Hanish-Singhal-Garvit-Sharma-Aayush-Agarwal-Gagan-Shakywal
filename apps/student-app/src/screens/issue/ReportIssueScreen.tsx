@@ -66,9 +66,9 @@ export const ReportIssueScreen: React.FC = () => {
           <View style={styles.successIconBadge}>
             <Text style={styles.successIconText}>🎉</Text>
           </View>
-          <Text style={styles.successTitle}>Report Submitted!</Text>
+          <Text style={styles.successTitle}>Demo Report Created</Text>
           <Text style={styles.successSub}>
-            Your transport issue has been logged with the SKIT Transport Office.
+            This sample ticket is for testing only. It has not been sent to the transport office.
           </Text>
 
           <View style={styles.ticketBox}>
@@ -87,7 +87,10 @@ export const ReportIssueScreen: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <Text style={styles.title}>Report Transport Issue</Text>
         <Text style={styles.subtitle}>
@@ -133,12 +136,13 @@ export const ReportIssueScreen: React.FC = () => {
           placeholderTextColor={colors.textMuted}
           multiline
           numberOfLines={5}
+          maxLength={500}
           textAlignVertical="top"
         />
         <Text style={styles.charCount}>{description.length} / 500 characters</Text>
 
         <PrimaryButton
-          title="Submit Report to Transport Desk"
+          title="Create Demo Report"
           onPress={handleSubmit}
           isLoading={isSubmitting}
           style={styles.submitBtn}
@@ -147,7 +151,7 @@ export const ReportIssueScreen: React.FC = () => {
 
       <View style={styles.disclaimerBox}>
         <Text style={styles.disclaimerText}>
-          🔒 Reports are directly handled by Swami Keshwanand Institute of Technology Transport Committee. Emergency cases should call transport helpline directly.
+          Demo mode: reports are simulated and are not sent to the transport office.
         </Text>
       </View>
     </ScrollView>
