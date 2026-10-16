@@ -31,10 +31,16 @@ apps/student-app/
 ├── package.json               # Dependencies & test scripts
 ├── tsconfig.json              # TypeScript configuration
 ├── jest.config.js             # Jest test configuration
+├── android/                   # Native Android project and Gradle wrapper
+├── docs/                      # Android validation record
 ├── __tests__/                 # Automated test suites
 │   ├── App.test.tsx
+│   ├── AppNavigator.test.tsx
+│   ├── LoginScreen.test.tsx
 │   ├── MockData.test.tsx
-│   └── MockApiService.test.tsx
+│   ├── MockApiService.test.tsx
+│   ├── Notifications.test.tsx
+│   └── StudentScreens.test.tsx
 └── src/
     ├── components/            # Reusable UI components
     │   ├── StudentHeader.tsx
