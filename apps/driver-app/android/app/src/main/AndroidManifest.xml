@@ -7,11 +7,11 @@
         Foreground GPS permissions for Driver App trip tracking.
         ACCESS_FINE_LOCATION  – precise GPS position (required for turn-by-turn accuracy)
         ACCESS_COARSE_LOCATION – fallback when GPS unavailable (network-based location)
-        FOREGROUND_SERVICE     – required to run a foreground service during an active trip
+        Tracking runs only while the app is visible; no Android foreground
+        service or background location permission is used in this milestone.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
       android:name=".MainApplication"

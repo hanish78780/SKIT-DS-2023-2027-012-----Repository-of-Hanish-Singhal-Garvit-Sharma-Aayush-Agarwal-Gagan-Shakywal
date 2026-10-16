@@ -45,7 +45,7 @@ const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
         {/* GPS Badge Overlay */}
         <View style={styles.gpsLiveBadge}>
           <View style={styles.pulseDot} />
-          <Text style={styles.gpsLiveText}>GPS LIVE BROADCASTING</Text>
+          <Text style={styles.gpsLiveText}>DEMO MAP & TRIP METRICS</Text>
         </View>
       </View>
 

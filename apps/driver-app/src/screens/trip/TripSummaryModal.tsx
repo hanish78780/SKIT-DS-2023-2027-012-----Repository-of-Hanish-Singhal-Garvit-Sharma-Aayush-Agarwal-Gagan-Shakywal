@@ -30,7 +30,7 @@ const TripSummaryModal: React.FC<TripSummaryModalProps> = ({
 
           <Text style={styles.title}>Trip Completed!</Text>
           <Text style={styles.subtitle}>
-            Your morning route broadcast has ended successfully.
+            Trip ended. Summary metrics below are demo data.
           </Text>
 
           {/* Statistics Grid */}

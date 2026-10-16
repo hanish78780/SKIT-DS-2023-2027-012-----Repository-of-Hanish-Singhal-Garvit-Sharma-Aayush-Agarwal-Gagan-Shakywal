@@ -1,39 +1,23 @@
-/**
- * useLocation.ts
- *
- * Custom React hook that wraps the locationService and exposes a clean,
- * state-driven GPS interface to screen components.
- *
- * Usage:
- *   const { locationState, startTracking, stopTracking } = useLocation();
- *
- * The hook:
- *  - Manages LocationState transitions
- *  - Prevents duplicate watch subscriptions
- *  - Cleans up the watcher on unmount automatically
- *  - Does NOT trigger GPS on mount; caller must explicitly call startTracking()
- */
+/** Foreground GPS state shared by the trip screens. */
 
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {LocationCoordinates, LocationState, LocationStatus} from '../types/driver';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
+import { LocationState, LocationStatus } from '../types/driver';
 import {
   checkLocationPermission,
   describeGeoError,
   getCurrentLocation,
+  PermissionResult,
   requestLocationPermission,
   startLocationUpdates,
   stopLocationUpdates,
 } from '../services/locationService';
-
-// ─── Initial State ────────────────────────────────────────────────────────────
 
 const INITIAL_STATE: LocationState = {
   status: 'idle',
   coordinates: null,
   errorMessage: null,
 };
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export interface UseLocationReturn {
   locationState: LocationState;
@@ -44,142 +28,221 @@ export interface UseLocationReturn {
 export function useLocation(): UseLocationReturn {
   const [locationState, setLocationState] =
     useState<LocationState>(INITIAL_STATE);
-
-  /** Ref to the active watchPosition watcher ID. null = not watching. */
   const watcherIdRef = useRef<number | null>(null);
+  const sessionRef = useRef(0);
+  const startingSessionRef = useRef<number | null>(null);
+  const trackingRequestedRef = useRef(false);
+  const mountedRef = useRef(true);
+  const appStateRef = useRef<string | null>(AppState.currentState ?? null);
+  const permissionPromiseRef = useRef<Promise<PermissionResult> | null>(null);
 
-  /** Guard: prevent double-start if the user taps rapidly. */
-  const isStartingRef = useRef<boolean>(false);
+  const isForeground = useCallback(
+    () => appStateRef.current === 'active' || appStateRef.current === null,
+    [],
+  );
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  function setStatus(status: LocationStatus, errorMessage: string | null = null) {
-    setLocationState(prev => ({...prev, status, errorMessage}));
-  }
-
-  function setCoordinates(coordinates: LocationCoordinates) {
-    setLocationState({
-      status: 'tracking',
-      coordinates,
-      errorMessage: null,
-    });
-  }
-
-  // ── startTracking ──────────────────────────────────────────────────────────
-
-  const startTracking = useCallback(async () => {
-    // Prevent duplicate calls
-    if (isStartingRef.current) {
-      return;
-    }
-
-    // If already tracking, do nothing
-    if (watcherIdRef.current !== null) {
-      return;
-    }
-
-    isStartingRef.current = true;
-
-    try {
-      // 1. Request permission
-      setStatus('requesting_permission');
-
-      let permission = await checkLocationPermission();
-
-      if (permission !== 'granted') {
-        permission = await requestLocationPermission();
-      }
-
-      if (permission === 'blocked') {
-        setStatus(
-          'permission_blocked',
-          'Location permission is permanently denied. Please enable it in Android Settings → App Info → Permissions.',
-        );
-        isStartingRef.current = false;
-        return;
-      }
-
-      if (permission === 'denied') {
-        setStatus(
-          'permission_denied',
-          'Location permission is required to track your bus position.',
-        );
-        isStartingRef.current = false;
-        return;
-      }
-
-      // 2. Get initial fix
-      setStatus('acquiring_location');
-
-      try {
-        const initialCoords = await getCurrentLocation();
-        setCoordinates(initialCoords);
-      } catch (err: any) {
-        // Code 2 = POSITION_UNAVAILABLE → device GPS is off
-        if (err?.code === 2) {
-          setStatus(
-            'location_unavailable',
-            'GPS / Location services are disabled on this device. Please enable them in Settings.',
-          );
-          isStartingRef.current = false;
-          return;
-        }
-        // Code 3 = timeout – not fatal, continue to watch
-        if (err?.code !== 3) {
-          setStatus('error', describeGeoError(err));
-          isStartingRef.current = false;
-          return;
-        }
-        // On timeout fall-through: start the watcher anyway; it may find a fix
-        setStatus('acquiring_location');
-      }
-
-      // 3. Start continuous watcher
-      // If a previous watcher somehow exists, clear it first
-      if (watcherIdRef.current !== null) {
-        stopLocationUpdates(watcherIdRef.current);
-        watcherIdRef.current = null;
-      }
-
-      const id = startLocationUpdates({
-        onLocation: coords => {
-          setCoordinates(coords);
-        },
-        onError: (message, code) => {
-          if (code === 2) {
-            setStatus('location_unavailable', message);
-          } else {
-            setStatus('error', message);
-          }
-        },
-      });
-
-      watcherIdRef.current = id;
-    } finally {
-      isStartingRef.current = false;
-    }
-  }, []);
-
-  // ── stopTracking ───────────────────────────────────────────────────────────
-
-  const stopTracking = useCallback(() => {
+  const cancelSession = useCallback(() => {
+    // Invalidate pending permission/fix results and already queued callbacks.
+    sessionRef.current += 1;
+    startingSessionRef.current = null;
     if (watcherIdRef.current !== null) {
       stopLocationUpdates(watcherIdRef.current);
       watcherIdRef.current = null;
     }
-    setLocationState(INITIAL_STATE);
   }, []);
 
-  // ── Cleanup on unmount ─────────────────────────────────────────────────────
+  const getPermission = useCallback(() => {
+    // A permission dialog can change AppState. Reuse its result when a resumed
+    // session starts, rather than opening a second dialog or losing the grant.
+    if (!permissionPromiseRef.current) {
+      const pending = (async () => {
+        const permission = await checkLocationPermission();
+        return permission === 'granted' ||
+          !mountedRef.current ||
+          !trackingRequestedRef.current ||
+          !isForeground()
+          ? permission
+          : requestLocationPermission();
+      })();
+      permissionPromiseRef.current = pending;
+      const clearPending = () => {
+        if (permissionPromiseRef.current === pending) {
+          permissionPromiseRef.current = null;
+        }
+      };
+      pending.then(clearPending, clearPending);
+    }
+    return permissionPromiseRef.current;
+  }, [isForeground]);
 
-  useEffect(() => {
-    return () => {
-      if (watcherIdRef.current !== null) {
-        stopLocationUpdates(watcherIdRef.current);
-        watcherIdRef.current = null;
+  const beginSession = useCallback(async () => {
+    if (
+      !mountedRef.current ||
+      !trackingRequestedRef.current ||
+      !isForeground() ||
+      startingSessionRef.current !== null ||
+      watcherIdRef.current !== null
+    ) {
+      return;
+    }
+
+    const session = ++sessionRef.current;
+    startingSessionRef.current = session;
+    const isCurrent = () =>
+      mountedRef.current &&
+      trackingRequestedRef.current &&
+      sessionRef.current === session &&
+      isForeground();
+    const setStatus = (
+      status: LocationStatus,
+      errorMessage: string | null = null,
+    ) => {
+      if (isCurrent()) {
+        setLocationState({ status, coordinates: null, errorMessage });
       }
     };
-  }, []);
 
-  return {locationState, startTracking, stopTracking};
+    try {
+      setStatus('requesting_permission');
+      const permission = await getPermission();
+      if (!isCurrent()) {
+        return;
+      }
+      if (permission !== 'granted') {
+        if (permission === 'blocked') {
+          setStatus(
+            'permission_blocked',
+            'Location permission is permanently denied. Please enable precise location in Android Settings → App Info → Permissions.',
+          );
+        } else {
+          setStatus(
+            'permission_denied',
+            permission === 'approximate'
+              ? 'Precise location is required for bus GPS tracking. Please enable Precise location in Android Settings → App Info → Permissions.'
+              : 'Location permission is required to track your bus position.',
+          );
+        }
+        return;
+      }
+
+      setStatus('acquiring_location');
+      try {
+        const coordinates = await getCurrentLocation();
+        if (!isCurrent()) {
+          return;
+        }
+        setLocationState({
+          status: 'tracking',
+          coordinates,
+          errorMessage: null,
+        });
+      } catch (error) {
+        if (!isCurrent()) {
+          return;
+        }
+        const code = (error as { code?: number } | null)?.code;
+        // A timed-out first fix can still be followed by a successful watch.
+        if (code !== 3) {
+          throw error;
+        }
+      }
+
+      if (!isCurrent()) {
+        return;
+      }
+      let permissionFailed = false;
+      const id = startLocationUpdates({
+        onLocation: coordinates => {
+          if (isCurrent() && !permissionFailed) {
+            setLocationState({
+              status: 'tracking',
+              coordinates,
+              errorMessage: null,
+            });
+          }
+        },
+        onError: (message, code) => {
+          if (!isCurrent()) {
+            return;
+          }
+          if (code === 1) {
+            permissionFailed = true;
+            if (watcherIdRef.current !== null) {
+              stopLocationUpdates(watcherIdRef.current);
+              watcherIdRef.current = null;
+            }
+            setStatus('permission_denied', message);
+          } else {
+            setStatus(code === 2 ? 'location_unavailable' : 'error', message);
+          }
+        },
+      });
+      if (!isCurrent() || permissionFailed) {
+        stopLocationUpdates(id);
+      } else {
+        watcherIdRef.current = id;
+      }
+    } catch (error) {
+      if (!isCurrent()) {
+        return;
+      }
+      const nativeError = error as { code?: number; message?: string } | null;
+      const code = nativeError?.code;
+      const message =
+        typeof code === 'number'
+          ? describeGeoError({ code, message: nativeError?.message ?? '' })
+          : 'Unable to start GPS tracking. Please try again.';
+      setStatus(
+        code === 1
+          ? 'permission_denied'
+          : code === 2
+          ? 'location_unavailable'
+          : 'error',
+        message,
+      );
+    } finally {
+      // A canceled request must not unlock a newer session's startup guard.
+      if (startingSessionRef.current === session) {
+        startingSessionRef.current = null;
+      }
+    }
+  }, [getPermission, isForeground]);
+
+  const startTracking = useCallback(async () => {
+    trackingRequestedRef.current = true;
+    await beginSession();
+  }, [beginSession]);
+
+  const stopTracking = useCallback(() => {
+    trackingRequestedRef.current = false;
+    cancelSession();
+    if (mountedRef.current) {
+      setLocationState(INITIAL_STATE);
+    }
+  }, [cancelSession]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    const subscription = AppState.addEventListener('change', nextState => {
+      const wasForeground = isForeground();
+      appStateRef.current = nextState;
+      if (!isForeground()) {
+        cancelSession();
+        setLocationState(INITIAL_STATE);
+      } else if (!wasForeground && trackingRequestedRef.current) {
+        beginSession().catch(error => {
+          console.warn('[useLocation] resume failed:', error);
+        });
+      }
+    });
+
+    return () => {
+      mountedRef.current = false;
+      trackingRequestedRef.current = false;
+      cancelSession();
+      subscription.remove();
+    };
+  }, [beginSession, cancelSession, isForeground]);
+
+  return { locationState, startTracking, stopTracking };
 }

@@ -14,8 +14,8 @@ import {name as appName} from './app.json';
  *
  * skipPermissionRequests: true  → We handle Android permissions ourselves
  *                                 via PermissionsAndroid in locationService.ts
- * locationProvider: 'android'   → Use Android's fused location provider
- *                                 (more reliable than raw GPS on emulators)
+ * locationProvider: 'android'   → Use the Android platform location API.
+ *                                 Emulator GPS injection reaches this provider.
  */
 Geolocation.setRNConfiguration({
   skipPermissionRequests: true,

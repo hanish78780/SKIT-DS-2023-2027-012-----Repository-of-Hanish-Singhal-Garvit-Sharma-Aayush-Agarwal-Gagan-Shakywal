@@ -15,7 +15,7 @@
  *   We use Object.defineProperty to temporarily override it instead.
  */
 
-import {PermissionsAndroid, Platform} from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -57,7 +57,25 @@ function makeGeoPosition(lat = 26.86, lng = 75.8) {
 }
 
 function makeGeoError(code: number, message = 'Error') {
-  return {code, message, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3};
+  return {
+    code,
+    message,
+    PERMISSION_DENIED: 1,
+    POSITION_UNAVAILABLE: 2,
+    TIMEOUT: 3,
+  };
+}
+
+type PermissionStatus =
+  (typeof PermissionsAndroid.RESULTS)[keyof typeof PermissionsAndroid.RESULTS];
+
+function permissionResults(fine: PermissionStatus, coarse: PermissionStatus) {
+  // React Native types this as a record of every permission, although native
+  // requestMultiple returns entries only for the requested permissions.
+  return {
+    [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION]: fine,
+    [PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION]: coarse,
+  } as Awaited<ReturnType<typeof PermissionsAndroid.requestMultiple>>;
 }
 
 // ─── Import after mocks ───────────────────────────────────────────────────────
@@ -70,6 +88,23 @@ import {
   startLocationUpdates,
   stopLocationUpdates,
 } from '../src/services/locationService';
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  mockGetCurrentPosition.mockReset();
+  mockWatchPosition.mockReset();
+  mockClearWatch.mockReset();
+});
+
+afterEach(() => {
+  for (const result of mockWatchPosition.mock.results) {
+    if (result.type === 'return' && typeof result.value === 'number') {
+      stopLocationUpdates(result.value);
+    }
+  }
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
 
 // ─── Tests: requestLocationPermission ─────────────────────────────────────────
 
@@ -86,40 +121,56 @@ describe('requestLocationPermission', () => {
     setPlatformOS('android');
   });
 
-  it('returns "granted" when PermissionsAndroid.request returns GRANTED', async () => {
-    jest
-      .spyOn(PermissionsAndroid, 'request')
-      .mockResolvedValue(PermissionsAndroid.RESULTS.GRANTED);
+  it('requests fine and coarse location together and returns a precise grant', async () => {
+    const requestSpy = jest
+      .spyOn(PermissionsAndroid, 'requestMultiple')
+      .mockResolvedValue(permissionResults('granted', 'granted'));
 
     const result = await requestLocationPermission();
     expect(result).toBe('granted');
+    expect(requestSpy).toHaveBeenCalledWith([
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+    ]);
   });
 
-  it('returns "denied" when PermissionsAndroid.request returns DENIED', async () => {
+  it('returns "denied" when both location permissions are denied', async () => {
     jest
-      .spyOn(PermissionsAndroid, 'request')
-      .mockResolvedValue(PermissionsAndroid.RESULTS.DENIED);
+      .spyOn(PermissionsAndroid, 'requestMultiple')
+      .mockResolvedValue(permissionResults('denied', 'denied'));
 
     const result = await requestLocationPermission();
     expect(result).toBe('denied');
   });
 
-  it('returns "blocked" when PermissionsAndroid.request returns NEVER_ASK_AGAIN', async () => {
+  it('returns "blocked" when precise location is permanently denied', async () => {
     jest
-      .spyOn(PermissionsAndroid, 'request')
-      .mockResolvedValue(PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN);
+      .spyOn(PermissionsAndroid, 'requestMultiple')
+      .mockResolvedValue(
+        permissionResults('never_ask_again', 'never_ask_again'),
+      );
 
     const result = await requestLocationPermission();
     expect(result).toBe('blocked');
   });
 
-  it('returns "denied" when PermissionsAndroid.request throws', async () => {
+  it('distinguishes an approximate-only grant from denied permission', async () => {
     jest
-      .spyOn(PermissionsAndroid, 'request')
+      .spyOn(PermissionsAndroid, 'requestMultiple')
+      .mockResolvedValue(permissionResults('never_ask_again', 'granted'));
+
+    expect(await requestLocationPermission()).toBe('approximate');
+  });
+
+  it('returns "denied" when PermissionsAndroid.requestMultiple throws', async () => {
+    jest
+      .spyOn(PermissionsAndroid, 'requestMultiple')
       .mockRejectedValue(new Error('Native crash'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     const result = await requestLocationPermission();
     expect(result).toBe('denied');
+    warnSpy.mockRestore();
   });
 
   it('returns "granted" on iOS (no PermissionsAndroid dialog needed)', async () => {
@@ -142,26 +193,45 @@ describe('checkLocationPermission', () => {
   });
 
   it('returns "granted" when permission is already granted', async () => {
-    jest
-      .spyOn(PermissionsAndroid, 'check')
-      .mockResolvedValue(true);
+    jest.spyOn(PermissionsAndroid, 'check').mockResolvedValue(true);
 
     const result = await checkLocationPermission();
     expect(result).toBe('granted');
   });
 
   it('returns "denied" when permission is not granted', async () => {
-    jest
-      .spyOn(PermissionsAndroid, 'check')
-      .mockResolvedValue(false);
+    jest.spyOn(PermissionsAndroid, 'check').mockResolvedValue(false);
 
     const result = await checkLocationPermission();
     expect(result).toBe('denied');
   });
 
+  it('returns "approximate" when only coarse location is granted', async () => {
+    jest
+      .spyOn(PermissionsAndroid, 'check')
+      .mockImplementation(
+        async permission =>
+          permission === PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      );
+
+    expect(await checkLocationPermission()).toBe('approximate');
+  });
+
+  it('returns "denied" if a permission check fails', async () => {
+    jest
+      .spyOn(PermissionsAndroid, 'check')
+      .mockRejectedValue(new Error('Native failure'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(await checkLocationPermission()).toBe('denied');
+    warnSpy.mockRestore();
+  });
+
   it('returns "granted" on iOS without checking PermissionsAndroid', async () => {
     setPlatformOS('ios');
-    const checkSpy = jest.spyOn(PermissionsAndroid, 'check').mockResolvedValue(false);
+    const checkSpy = jest
+      .spyOn(PermissionsAndroid, 'check')
+      .mockResolvedValue(false);
     checkSpy.mockClear(); // clear any prior calls
 
     const result = await checkLocationPermission();
@@ -231,7 +301,7 @@ describe('getCurrentLocation', () => {
 
     // Suppress expected console.warn in this test
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    await expect(getCurrentLocation()).rejects.toMatchObject({code: 2});
+    await expect(getCurrentLocation()).rejects.toMatchObject({ code: 2 });
     warnSpy.mockRestore();
   });
 });
@@ -267,7 +337,7 @@ describe('startLocationUpdates', () => {
       },
     );
 
-    startLocationUpdates({onLocation, onError: jest.fn()});
+    startLocationUpdates({ onLocation, onError: jest.fn() });
 
     expect(onLocation).toHaveBeenCalledTimes(1);
     expect(onLocation.mock.calls[0][0]).toMatchObject({
@@ -290,7 +360,7 @@ describe('startLocationUpdates', () => {
       },
     );
 
-    startLocationUpdates({onLocation: jest.fn(), onError});
+    startLocationUpdates({ onLocation: jest.fn(), onError });
 
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onError.mock.calls[0][1]).toBe(2); // code
@@ -312,5 +382,122 @@ describe('stopLocationUpdates', () => {
   it('is a no-op when called with null', () => {
     stopLocationUpdates(null);
     expect(mockClearWatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('foreground watcher health checks', () => {
+  let onLocation: jest.Mock;
+  let onError: jest.Mock;
+  let watchSuccess: (position: ReturnType<typeof makeGeoPosition>) => void;
+  let watchError: (error: ReturnType<typeof makeGeoError>) => void;
+  let probeSuccess: (position: ReturnType<typeof makeGeoPosition>) => void;
+  let probeError: (error: ReturnType<typeof makeGeoError>) => void;
+
+  beforeEach(() => {
+    onLocation = jest.fn();
+    onError = jest.fn();
+    mockWatchPosition.mockImplementation((success, error) => {
+      watchSuccess = success;
+      watchError = error;
+      return 101;
+    });
+    mockGetCurrentPosition.mockImplementation((success, error) => {
+      probeSuccess = success;
+      probeError = error;
+    });
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  it('detects a disabled provider after watch silence using a fresh bounded request', () => {
+    startLocationUpdates({ onLocation, onError });
+    jest.advanceTimersByTime(20000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(mockGetCurrentPosition.mock.calls[0][2]).toMatchObject({
+      maximumAge: 0,
+      timeout: 15000,
+    });
+    probeError(makeGeoError(2, 'No location provider available'));
+    expect(onError).toHaveBeenCalledWith(
+      expect.stringMatching(/unavailable/i),
+      2,
+    );
+  });
+
+  it('keeps a stationary bus valid when its fresh health fix succeeds', () => {
+    startLocationUpdates({ onLocation, onError });
+    watchSuccess(makeGeoPosition());
+    jest.advanceTimersByTime(20000);
+    probeSuccess(makeGeoPosition());
+    expect(onLocation).toHaveBeenCalledTimes(2);
+    expect(onError).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(20000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(2);
+  });
+
+  it('defers health probes while watch updates arrive', () => {
+    startLocationUpdates({ onLocation, onError });
+    jest.advanceTimersByTime(15000);
+    watchSuccess(makeGeoPosition());
+    jest.advanceTimersByTime(15000);
+    expect(mockGetCurrentPosition).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(5000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
+  it('never overlaps probes and resumes checks after a failed probe', () => {
+    startLocationUpdates({ onLocation, onError });
+    jest.advanceTimersByTime(20000);
+    jest.advanceTimersByTime(60000);
+    watchSuccess(makeGeoPosition());
+    jest.advanceTimersByTime(60000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+    probeError(makeGeoError(3, 'Timeout'));
+    jest.advanceTimersByTime(20000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['success', 'error'])(
+    'ignores a stale probe %s after a newer watch fix arrives',
+    result => {
+      startLocationUpdates({onLocation, onError});
+      jest.advanceTimersByTime(20000);
+      const freshPosition = makeGeoPosition(26.87, 75.81);
+      watchSuccess(freshPosition);
+      if (result === 'success') {
+        probeSuccess(makeGeoPosition());
+      } else {
+        probeError(makeGeoError(3, 'Old request timed out'));
+      }
+      expect(onLocation).toHaveBeenCalledTimes(1);
+      expect(onLocation).toHaveBeenLastCalledWith(
+        expect.objectContaining({latitude: 26.87, longitude: 75.81}),
+      );
+      expect(onError).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(20000);
+      expect(mockGetCurrentPosition).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('clears scheduled health work when stopped and ignores late watch events', () => {
+    const id = startLocationUpdates({ onLocation, onError });
+    stopLocationUpdates(id);
+    jest.advanceTimersByTime(60000);
+    watchSuccess(makeGeoPosition());
+    watchError(makeGeoError(2));
+    expect(mockGetCurrentPosition).not.toHaveBeenCalled();
+    expect(onLocation).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('ignores an in-flight probe finishing after stop and schedules no further checks', () => {
+    const id = startLocationUpdates({ onLocation, onError });
+    jest.advanceTimersByTime(20000);
+    stopLocationUpdates(id);
+    probeSuccess(makeGeoPosition());
+    probeError(makeGeoError(2));
+    jest.advanceTimersByTime(60000);
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(onLocation).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
   });
 });
