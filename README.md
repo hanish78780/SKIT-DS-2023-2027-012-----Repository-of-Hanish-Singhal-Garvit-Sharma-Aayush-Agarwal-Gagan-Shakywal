@@ -1,401 +1,108 @@
-# UniTransit 🚌
+# UniTransit
 
-> **Smart College Transportation Management System for SKIT Jaipur**
+College transportation management system for SKIT Jaipur, with separate Student and Driver mobile apps, an Admin dashboard, and an Express API.
 
-UniTransit is a college-focused transportation management platform designed for **Swami Keshwanand Institute of Technology & Management (SKIT Jaipur)**. It connects students, drivers, and college transport administrators through a unified system for bus management, route management, trip operations, and real-time transportation tracking.
+## Current implementation
 
-## 🎯 Project Goal
+| Package | Stack | Current scope |
+| --- | --- | --- |
+| [Student App](apps/student-app/README.md) | React Native / TypeScript | Student screens, route timeline, simulated bus tracking and sample notifications. Backend integration is pending. |
+| [Driver App](apps/driver-app/README.md) | React Native / TypeScript | Trip UI and Android foreground GPS. Map, transport records and server broadcasts are still prototypes. |
+| [Admin dashboard](apps/admin-dashboard/README.md) | React / Vite | Transport management screens backed by local mock state. |
+| [Backend](backend/README.md) | Node.js / Express / Mongoose | Health endpoints, JWT authentication and student API foundation; domain schemas are retained for further integration. |
 
-The goal of UniTransit is to make college transportation safer, more transparent, and easier to manage by providing:
+Clients access persistent data through the backend API. They must not connect directly to MongoDB. Development data is synthetic; live GPS uploads, cross-app tracking and FCM delivery remain integration work.
 
-- Live bus tracking
-- Driver trip management
-- Student bus and route information
-- Route and stop management
-- Bus and driver administration
-- Transport notifications
-- Trip monitoring and history
-- Centralized college transport operations
-
-## 🏗️ System Architecture
+## Repository layout
 
 ```text
-                         UniTransit
-                              │
-             ┌────────────────┼────────────────┐
-             │                │                │
-             ▼                ▼                ▼
-       Student App       Driver App      Admin Dashboard
-       React Native      React Native        React + Vite
-             │                │                │
-             └────────────────┼────────────────┘
-                              ▼
-                     Node.js + Express
-                              │
-                              ▼
-                           MongoDB
-                              │
-                    ┌─────────┴─────────┐
-                    ▼                   ▼
-              GPS / Location       Transport Data
-```
-
-### Applications
-
-| Application | Platform | Purpose |
-|---|---|---|
-| **Student App** | React Native / Android | Bus tracking, routes, stops, trip status and notifications |
-| **Driver App** | React Native / Android | Driver login, assigned bus/route, trip control and GPS location |
-| **Admin Dashboard** | React + Vite / Web | Manage buses, drivers, students, routes, trips and transport operations |
-| **Backend** | Node.js + Express | API, authentication, business logic and communication between clients |
-| **Database** | MongoDB | Stores application and transportation data |
-
-## 📱 Student App
-
-The Student App is designed around the student's daily transportation needs.
-
-### Planned / Implemented Features
-
-- Student authentication
-- Student profile
-- Assigned bus information
-- Assigned route and pickup stop
-- Live bus tracking
-- Estimated arrival information
-- Route and stop timeline
-- Driver information relevant to transportation
-- Trip status
-- Transport notifications
-- Report transport issue
-- Help and safety information
-
-### Student Flow
-
-```text
-Login
-  ↓
-Student Home
-  ↓
-View Assigned Bus / Route
-  ↓
-Track Bus
-  ↓
-View ETA / Stops
-  ↓
-Trip Updates & Notifications
-```
-
-## 🚍 Driver App
-
-The Driver App helps authorized college transport personnel operate assigned trips.
-
-### Current Features
-
-- Driver login
-- Driver dashboard
-- Driver profile
-- Assigned bus information
-- Assigned route information
-- Trip status management
-- Start Trip
-- Active Trip state
-- Stop Trip
-- Logout
-- Route / student view
-- Notification view
-- Profile and support screens
-- Mock GPS/map interface for UI development
-
-### Driver Flow
-
-```text
-Splash
-  ↓
-Login
-  ↓
-Driver Dashboard
-  ↓
-Start Trip
-  ↓
-Active Trip
-  ↓
-Route / Students
-  ↓
-Stop Trip
-  ↓
-Trip Summary
-  ↓
-Dashboard / Logout
-```
-
-> **Current limitation:** Real GPS location tracking, background location, backend location APIs, and real-time WebSocket updates are being developed separately. Current GPS/map elements may use mock data for UI testing.
-
-## 🖥️ Admin Dashboard
-
-The Admin Dashboard is the central control panel for authorized SKIT Jaipur transport administrators.
-
-### Responsibilities
-
-- Transport overview
-- Live bus monitoring
-- Bus management
-- Driver management
-- Student management
-- Route and stop management
-- Driver-to-bus assignment
-- Bus-to-route assignment
-- Student-to-route/stop assignment
-- Trip management
-- Transport notifications
-- Reports and analytics
-- Admin settings
-
-### Admin Dashboard Flow
-
-```text
-Admin Login
-    ↓
-Transport Overview
-    ├── Live Tracking
-    ├── Buses
-    ├── Drivers
-    ├── Students
-    ├── Routes & Stops
-    ├── Trips
-    ├── Notifications
-    ├── Reports & Analytics
-    └── Settings
-```
-
-## 🔄 How the Apps Work Together
-
-```text
-Driver App
-    │
-    │  Trip + GPS Location
-    ▼
-Backend API
-    │
-    ├──────────────► Admin Dashboard
-    │                    │
-    │                    └── Monitor & Manage
-    │
-    └──────────────► Student App
-                         │
-                         └── Bus Location / ETA / Route
-```
-
-The clients communicate through the backend. **Mobile/web clients do not connect directly to MongoDB.**
-
-## 🛠️ Technology Stack
-
-### Frontend
-
-- React Native
-- TypeScript
-- React
-- Vite
-- HTML / CSS
-
-### Backend
-
-- Node.js
-- Express.js
-- REST APIs
-- Authentication
-
-### Database
-
-- MongoDB
-- Mongoose
-
-### Location & Maps
-
-- Android GPS / Location Services
-- Google Maps integration planned
-- Real-time location updates planned
-
-### Development Tools
-
-- Git & GitHub
-- Android Studio
-- Android Emulator
-- VS Code / Antigravity
-- Postman
-
-## 📂 Repository Structure
-
-```text
-UniTransit/
-│
+.
 ├── apps/
-│   ├── student-app/       # Student mobile application
-│   ├── driver-app/        # Driver mobile application
-│   └── admin-dashboard/   # College admin web dashboard
-│
-├── backend/               # Node.js / Express backend
-│
-├── docs/                  # Project documentation
-│
-├── .github/
-│   └── workflows/         # GitHub Actions
-│
+│   ├── admin-dashboard/      # Web client: src/, public/, package/config files
+│   ├── driver-app/           # Mobile client: src/, android/, ios/, __tests__/, docs/
+│   └── student-app/          # Mobile client: src/, android/, __tests__/
+├── backend/
+│   ├── src/
+│   │   ├── config/           # Database connection
+│   │   ├── controllers/      # Request handlers
+│   │   ├── middleware/       # Authentication and authorization
+│   │   ├── models/           # Mongoose schemas
+│   │   ├── routes/           # Express routes
+│   │   ├── app.js            # Express app
+│   │   └── server.js         # Server entry point
+│   ├── .env.example
+│   └── package.json
+├── docs/
+│   ├── wiki/                 # Architecture, workflows and project guides
+│   ├── reports/weekly/       # Historical college progress reports
+│   └── repository-cleanup.md # Cleanup decisions and validation
+├── scripts/reports/          # Progress report generator and Python requirements
+├── .github/workflows/        # Scheduled report generation
+├── .gitignore
 └── README.md
 ```
 
-## 🌿 Git Workflow
+Each app and the backend owns its dependencies and configuration. There is no root npm workspace or shared runtime package. Add shared code only when it has real consumers; create provider configuration when that integration is implemented.
 
-The project follows a feature-branch workflow.
+## Getting started
 
-```text
-main
-  ↑
-  │
- develop
-  ↑
-  │
-feature/<feature-name>
+Use Node.js 22.18 or later in the supported Node 22 release line. Android work also needs JDK 17, Android Studio and the SDK/NDK versions declared by the selected app. iOS work needs macOS, Xcode and CocoaPods.
+
+Install dependencies inside the package you are working on:
+
+```powershell
+cd apps/admin-dashboard
+npm ci
+npm run dev
 ```
 
-### Branches
+For a mobile app, start its development server and run Android in a second terminal. Use a separate port for each app:
 
-- `main` — stable/demo-ready code
-- `develop` — integration branch
-- `feature/*` — individual feature development
-
-### Development Process
-
-```text
-Create Feature Branch
-        ↓
-Implement Small Feature
-        ↓
-Run Tests
-        ↓
-Commit Focused Change
-        ↓
-Push Feature Branch
-        ↓
-Create Pull Request
-        ↓
-Code Review
-        ↓
-Merge into develop
-        ↓
-Testing
-        ↓
-Release to main
+```powershell
+cd apps/driver-app
+npm ci
+npm start -- --port 8081
 ```
 
-Keep commits small and focused. Avoid mixing unrelated features in a single commit.
+```powershell
+cd apps/driver-app
+npm run android -- --port 8081 --no-packager --active-arch-only
+```
 
-## 👥 Team Responsibilities
+For the Student App use `apps/student-app` and port `8082`. The backend requires its own dependency install and environment configuration; follow its [setup guide](backend/README.md).
+
+## Validation
+
+Run checks from the package directory:
+
+| Package | Checks |
+| --- | --- |
+| Admin dashboard | `npm run lint` and `npm run build` |
+| Driver App | `npx tsc --noEmit`, `npm test -- --runInBand`, `npm run lint` |
+| Student App | `npm run typecheck`, `npm test -- --runInBand`, `npm run lint` |
+| Backend | Commands in [backend/README.md](backend/README.md) |
+
+Mobile changes affecting native configuration also require an Android build and relevant emulator/device checks. See the [Driver GPS validation record](apps/driver-app/docs/foreground-gps-validation.md) and [project testing guide](docs/wiki/12-Testing.md).
+
+## Progress reports
+
+The reporting tool lives in [scripts/reports](scripts/reports/README.md). GitHub Actions generates the weekly report and archives it in [docs/reports/weekly](docs/reports/weekly). Existing PDFs are project records and remain versioned.
+
+## Git workflow
+
+Use `feature/*` or `docs/*` branches, open a pull request into `develop`, and promote tested releases to `main`. Keep feature work separate from cleanup and documentation. Do not push directly to `main` or `develop`, or merge without review.
+
+## Team
 
 | Member | Responsibility |
-|---|---|
-| **Hanish Singhal** | Driver App, GPS/Location, technical coordination |
-| **Garvit Sharma** | Backend / API development |
-| **Gagan Shakywal** | Student App |
-| **Aayush Agarwal** | Admin Dashboard / QA |
+| --- | --- |
+| Hanish Singhal | Driver App, GPS and technical coordination |
+| Garvit Sharma | Backend and API |
+| Gagan Shakywal | Student App |
+| Aayush Agarwal | Admin dashboard and QA |
 
-## 🗓️ Development Roadmap
+## Documentation and configuration
 
-### Driver / Transportation
+The [project wiki](docs/wiki/README.md) contains architecture, data models, environment setup, responsibilities and roadmap. These plans describe intended integrations; an unimplemented feature is not evidence that its supporting domain model is unnecessary.
 
-- Driver UI — Completed / ongoing refinement
-- GPS foundation — In progress
-- Real-time tracking — Planned/in progress
-- Route integration — Planned
-- Testing — Planned
-- Final integration — Planned
-
-### Overall System
-
-```text
-UI Foundations
-     ↓
-Authentication
-     ↓
-Bus / Driver / Student / Route Management
-     ↓
-GPS Location
-     ↓
-Real-Time Tracking
-     ↓
-Backend Integration
-     ↓
-Cross-App Integration
-     ↓
-Testing
-     ↓
-College Demo / Deployment
-```
-
-## 🔐 Data & Privacy
-
-UniTransit is being developed as a college transportation system. Development currently uses **mock/test data** unless authorized college data is explicitly provided through the appropriate process.
-
-Do not commit:
-
-- Passwords
-- API keys
-- Database credentials
-- Private tokens
-- Unnecessary personal information
-- Production secrets
-
-Use environment variables for sensitive configuration.
-
-## 🧪 Testing
-
-Before creating a pull request, run the relevant checks for the application being changed.
-
-For the Driver App, for example:
-
-```bash
-npx tsc --noEmit
-npm test
-npx react-native run-android
-```
-
-Also verify the affected user flow on an Android emulator or physical test device when applicable.
-
-## 🚀 Getting Started
-
-Clone the repository:
-
-```bash
-git clone <repository-url>
-cd <repository-folder>
-```
-
-Switch to the integration branch:
-
-```bash
-git checkout develop
-git pull origin develop
-```
-
-Each application has its own dependencies and run instructions. Refer to the application's `package.json` and local documentation before starting it.
-
-## 📌 Project Status
-
-UniTransit is currently under active development.
-
-Current focus:
-
-- Building the three application interfaces
-- Establishing backend APIs and data models
-- Implementing driver GPS foundation
-- Preparing real-time bus tracking
-- Connecting student, driver, and admin workflows
-
-## 📄 Documentation
-
-Project documentation should be maintained under `docs/` and updated as the architecture, APIs, workflows, and development plans evolve.
-
-## 🚌 UniTransit
-
-**Smart transportation. Connected campus. Safer journeys.**
-
-Built for **SKIT Jaipur — Swami Keshwanand Institute of Technology & Management**.
+Use each package's `.env.example` for local configuration. Keep credentials, generated builds, caches and installed dependencies out of Git.

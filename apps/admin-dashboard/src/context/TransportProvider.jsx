@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const TransportContext = createContext();
+import { useState, useEffect } from 'react';
+import TransportContext from './TransportContext';
 
 const initialDrivers = [
   { id: 'DRV-001', name: 'Rajesh Kumar', initial: 'R', phone: '98765 43210', bus: 'RJ-14-AB-1234', route: 'Route 03', trip: 'TRIP-1024', status: 'Online', license: 'RJ14-2018-0912' },
@@ -356,5 +355,3 @@ export const TransportProvider = ({ children }) => {
     </TransportContext.Provider>
   );
 };
-
-export const useTransport = () => useContext(TransportContext);

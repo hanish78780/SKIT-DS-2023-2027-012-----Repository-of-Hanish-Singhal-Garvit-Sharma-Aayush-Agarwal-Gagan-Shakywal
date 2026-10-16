@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Bus, UserRound, Users, Clock, X, Navigation, Phone, CheckCircle, Radio } from 'lucide-react';
-import { useTransport } from '../context/TransportContext';
+import { useTransport } from '../context/useTransport';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { trips: tripsList, buses, drivers, students } = useTransport();
+  const { trips: tripsList } = useTransport();
   const [modalType, setModalType] = useState(null); // 'view' | 'track' | null
   const [selectedTrip, setSelectedTrip] = useState(null);
 

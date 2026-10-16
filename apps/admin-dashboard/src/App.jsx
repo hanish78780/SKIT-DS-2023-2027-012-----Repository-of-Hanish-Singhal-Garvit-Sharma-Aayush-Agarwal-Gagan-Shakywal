@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Drivers from "./pages/Drivers";
 import Buses from "./pages/Buses";
-import { TransportProvider } from "./context/TransportContext";
+import { TransportProvider } from "./context/TransportProvider";
 import "./App.css";
 
 function App() {
@@ -23,7 +23,6 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            {/* Future routes will go here */}
             <Route path="students" element={<Students />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="buses" element={<Buses />} />

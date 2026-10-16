@@ -31,10 +31,16 @@ apps/student-app/
 ├── package.json               # Dependencies & test scripts
 ├── tsconfig.json              # TypeScript configuration
 ├── jest.config.js             # Jest test configuration
+├── android/                   # Native Android project and Gradle wrapper
+├── docs/                      # Android validation record
 ├── __tests__/                 # Automated test suites
 │   ├── App.test.tsx
+│   ├── AppNavigator.test.tsx
+│   ├── LoginScreen.test.tsx
 │   ├── MockData.test.tsx
-│   └── MockApiService.test.tsx
+│   ├── MockApiService.test.tsx
+│   ├── Notifications.test.tsx
+│   └── StudentScreens.test.tsx
 └── src/
     ├── components/            # Reusable UI components
     │   ├── StudentHeader.tsx
@@ -48,8 +54,7 @@ apps/student-app/
     │   ├── PrimaryButton.tsx
     │   ├── SecondaryButton.tsx
     │   ├── LoadingState.tsx
-    │   ├── EmptyState.tsx
-    │   └── ErrorState.tsx
+    │   └── EmptyState.tsx
     ├── screens/               # App screen views
     │   ├── auth/LoginScreen.tsx
     │   ├── home/HomeScreen.tsx
@@ -67,7 +72,7 @@ apps/student-app/
     │   └── mockData.ts        # Centralized mock data
     ├── services/
     │   └── mockApi.ts         # Service layer ready for API integration
-    ├── theme/                 # Design tokens (colors, typography, shadows)
+    ├── theme/                 # Colors and shared shadows
     └── types/                 # TypeScript interfaces & types
 ```
 
