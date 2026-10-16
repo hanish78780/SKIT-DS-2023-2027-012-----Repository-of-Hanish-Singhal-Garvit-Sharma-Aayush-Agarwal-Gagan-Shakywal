@@ -132,8 +132,6 @@
 
 /* Colorize the lucide icons to match the screenshot */
 .bus-icon { color: #facc15; } /* Yellowish */
-.driver-icon { color: #94a3b8; }
-.student-icon { color: #a855f7; } /* Purple */
 
 .login-stat-info h3 {
   margin: 0;

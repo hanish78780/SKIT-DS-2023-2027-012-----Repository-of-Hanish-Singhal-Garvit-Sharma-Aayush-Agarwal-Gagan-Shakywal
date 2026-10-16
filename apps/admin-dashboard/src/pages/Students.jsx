@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, X, User, Bus, MapPin, CheckCircle } from 'lucide-react';
-import { useTransport } from '../context/TransportContext';
+import { useState } from 'react';
+import { Search, ChevronDown, X } from 'lucide-react';
+import { useTransport } from '../context/useTransport';
 import './Students.css';
 
 const Students = () => {
@@ -42,12 +42,10 @@ const Students = () => {
     ])
   ).sort();
 
-  // Reset selected route if it no longer exists in assigned routes
-  useEffect(() => {
-    if (selectedRoute !== 'All Routes' && !assignedRoutes.includes(selectedRoute)) {
-      setSelectedRoute('All Routes');
-    }
-  }, [assignedRoutes, selectedRoute]);
+  // Reset an invalid selection before rendering the updated route options.
+  if (selectedRoute !== 'All Routes' && !assignedRoutes.includes(selectedRoute)) {
+    setSelectedRoute('All Routes');
+  }
 
   const filteredStudents = studentsList.filter((student) => {
     const matchesRoute = selectedRoute === 'All Routes' || student.route === selectedRoute;
