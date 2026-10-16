@@ -20,42 +20,44 @@ import Geolocation, {
   GeolocationResponse,
   GeolocationOptions,
 } from '@react-native-community/geolocation';
-import {PermissionsAndroid, Platform} from 'react-native';
-import {LocationCoordinates} from '../types/driver';
+import { PermissionsAndroid, Platform } from 'react-native';
+import { LocationCoordinates } from '../types/driver';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Shared options for getCurrentPosition and watchPosition. */
 const GEO_OPTIONS: GeolocationOptions = {
   enableHighAccuracy: true,
-  timeout: 15000,       // 15 s before timing out
-  maximumAge: 5000,     // accept a cached fix up to 5 s old
+  timeout: 15000, // 15 s before timing out
+  maximumAge: 5000, // accept a cached fix up to 5 s old
 };
 
 /** Watch options – slightly looser timeout for continuous updates. */
 const WATCH_OPTIONS: GeolocationOptions = {
   enableHighAccuracy: true,
   timeout: 20000,
-  maximumAge: 0,        // always fetch fresh position while watching
-  distanceFilter: 5,    // only fire callback if driver moves ≥ 5 m
+  maximumAge: 0, // always fetch fresh position while watching
+  distanceFilter: 5, // only fire callback if driver moves ≥ 5 m
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PermissionResult =
   | 'granted'
+  | 'approximate' // Android granted coarse location, but not precise GPS
   | 'denied'
-  | 'blocked'    // "Don't ask again" selected
+  | 'blocked' // "Don't ask again" selected
   | 'unavailable'; // non-Android where PermissionsAndroid is N/A
 
 // ─── Android Permission ───────────────────────────────────────────────────────
 
 /**
- * Request ACCESS_FINE_LOCATION permission on Android.
+ * Request precise and approximate location together on Android.
  * On iOS the permission is handled by Geolocation itself (not needed here).
  *
  * Returns:
  *  'granted'     – user allowed
+ *  'approximate' – user allowed approximate location only
  *  'denied'      – user denied (can ask again next time)
  *  'blocked'     – user selected "Don't ask again"
  *  'unavailable' – not Android (no PermissionsAndroid)
@@ -67,24 +69,25 @@ export async function requestLocationPermission(): Promise<PermissionResult> {
   }
 
   try {
-    const result = await PermissionsAndroid.request(
+    // Android 12+ can ignore a fine-only request. The driver needs precise GPS,
+    // so distinguish an approximate grant from a complete denial.
+    const results = await PermissionsAndroid.requestMultiple([
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      {
-        title: 'UniTransit – Location Permission',
-        message:
-          'UniTransit needs access to your GPS location to broadcast your ' +
-          'bus position to students during an active trip.',
-        buttonPositive: 'Allow',
-        buttonNegative: 'Deny',
-        buttonNeutral: 'Ask Me Later',
-      },
-    );
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+    ]);
+    const fine = results[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
+    const coarse =
+      results[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION];
 
-    if (result === PermissionsAndroid.RESULTS.GRANTED) {
+    if (fine === PermissionsAndroid.RESULTS.GRANTED) {
       return 'granted';
     }
 
-    if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+    if (coarse === PermissionsAndroid.RESULTS.GRANTED) {
+      return 'approximate';
+    }
+
+    if (fine === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
       return 'blocked';
     }
 
@@ -106,10 +109,16 @@ export async function checkLocationPermission(): Promise<PermissionResult> {
   }
 
   try {
-    const granted = await PermissionsAndroid.check(
+    const fine = await PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
-    return granted ? 'granted' : 'denied';
+    if (fine) {
+      return 'granted';
+    }
+    const coarse = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+    );
+    return coarse ? 'approximate' : 'denied';
   } catch (err) {
     console.warn('[LocationService] checkLocationPermission error:', err);
     return 'denied';
@@ -141,7 +150,9 @@ function mapPosition(pos: GeolocationResponse): LocationCoordinates {
  *  2 – POSITION_UNAVAILABLE (GPS hardware / provider unavailable)
  *  3 – TIMEOUT
  */
-export function describeGeoError(err: GeolocationError): string {
+export function describeGeoError(
+  err: Pick<GeolocationError, 'code' | 'message'>,
+): string {
   switch (err.code) {
     case 1:
       return 'Location permission was denied. Please allow location access in Settings.';
@@ -182,6 +193,9 @@ export function getCurrentLocation(): Promise<LocationCoordinates> {
 /** Opaque watcher ID returned by watchPosition – used to clear it later. */
 type WatcherId = number;
 
+const WATCH_HEALTH_INTERVAL_MS = 20000;
+const watcherCleanups = new Map<WatcherId, () => void>();
+
 /** Callbacks provided by the caller to receive updates / errors. */
 export interface LocationWatchCallbacks {
   onLocation: (coords: LocationCoordinates) => void;
@@ -202,17 +216,83 @@ export interface LocationWatchCallbacks {
 export function startLocationUpdates(
   callbacks: LocationWatchCallbacks,
 ): WatcherId {
-  const watcherId = Geolocation.watchPosition(
-    (pos: GeolocationResponse) => {
+  let stopped = false;
+  let probeInFlight = false;
+  let watchGeneration = 0;
+  let healthTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function scheduleHealthCheck() {
+    if (healthTimer !== null) {
+      clearTimeout(healthTimer);
+      healthTimer = null;
+    }
+    if (!stopped && !probeInFlight) {
+      healthTimer = setTimeout(checkProvider, WATCH_HEALTH_INTERVAL_MS);
+    }
+  }
+
+  function onPosition(pos: GeolocationResponse) {
+    if (!stopped) {
       callbacks.onLocation(mapPosition(pos));
-    },
-    (err: GeolocationError) => {
+      scheduleHealthCheck();
+    }
+  }
+
+  function onError(err: GeolocationError) {
+    if (!stopped) {
       console.warn('[LocationService] watchPosition error:', err);
       callbacks.onError(describeGeoError(err), err.code);
+      scheduleHealthCheck();
+    }
+  }
+
+  function checkProvider() {
+    healthTimer = null;
+    if (stopped || probeInFlight) {
+      return;
+    }
+    // The Android platform watcher has no timeout or provider-disabled event.
+    // Check a silent watch with a fresh fix: a stationary bus is still valid.
+    probeInFlight = true;
+    const probeGeneration = watchGeneration;
+    Geolocation.getCurrentPosition(
+      pos => {
+        probeInFlight = false;
+        if (probeGeneration === watchGeneration) {
+          onPosition(pos);
+        } else {
+          scheduleHealthCheck();
+        }
+      },
+      err => {
+        probeInFlight = false;
+        if (probeGeneration === watchGeneration) {
+          onError(err);
+        } else {
+          scheduleHealthCheck();
+        }
+      },
+      { ...GEO_OPTIONS, maximumAge: 0 },
+    );
+  }
+
+  const watcherId = Geolocation.watchPosition(
+    pos => {
+      // A fresh watch fix supersedes any older in-flight health probe.
+      watchGeneration += 1;
+      onPosition(pos);
     },
+    onError,
     WATCH_OPTIONS,
   );
-
+  watcherCleanups.set(watcherId, () => {
+    stopped = true;
+    if (healthTimer !== null) {
+      clearTimeout(healthTimer);
+      healthTimer = null;
+    }
+  });
+  scheduleHealthCheck();
   return watcherId;
 }
 
@@ -223,6 +303,8 @@ export function startLocationUpdates(
  */
 export function stopLocationUpdates(watcherId: WatcherId | null): void {
   if (watcherId !== null && watcherId !== undefined) {
+    watcherCleanups.get(watcherId)?.();
+    watcherCleanups.delete(watcherId);
     Geolocation.clearWatch(watcherId);
   }
 }

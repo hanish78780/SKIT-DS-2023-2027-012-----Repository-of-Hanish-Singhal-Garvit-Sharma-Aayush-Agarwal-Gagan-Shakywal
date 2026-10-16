@@ -73,8 +73,8 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
             isTracking && locationState.coordinates
               ? `${locationState.coordinates.latitude.toFixed(4)}°N, ${locationState.coordinates.longitude.toFixed(4)}°E`
               : isStarted
-              ? mockTripMetrics.currentLocationName
-              : 'Depot (SKIT Campus Main Parking)'
+              ? 'Waiting for a current GPS fix'
+              : 'Trip not started'
           }
         />
 
@@ -132,7 +132,7 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
           />
         ) : (
           <PrimaryButton
-            title="START TRIP BROADCAST"
+            title="START TRIP"
             variant="primary"
             onPress={onStopTrip}
             style={styles.stopBtn}

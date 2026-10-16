@@ -35,8 +35,8 @@ const TripStatusCard: React.FC<TripStatusCardProps> = ({
 
       <Text style={styles.description}>
         {isStarted
-          ? 'Live GPS broadcasting active. Student app is receiving real-time vehicle updates.'
-          : 'Ready to begin assigned route. Tap below to start broadcasting live location.'}
+          ? 'Trip active. Check the GPS status above for local location tracking.'
+          : 'Ready to begin assigned route. Tap below to start foreground GPS tracking.'}
       </Text>
 
       {isStarted ? (
