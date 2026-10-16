@@ -49,7 +49,7 @@ export const LiveTrackingScreen: React.FC<LiveTrackingScreenProps> = ({
   }, []);
 
   if (loading || !bus || !route || !student) {
-    return <LoadingState message="Connecting to Live GPS Feed..." />;
+    return <LoadingState message="Loading demo bus data..." />;
   }
 
   const handleCallDriver = () => {
@@ -71,7 +71,7 @@ export const LiveTrackingScreen: React.FC<LiveTrackingScreenProps> = ({
       {/* Header Bar */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Live Bus Tracking</Text>
+          <Text style={styles.title}>Bus Tracking Demo</Text>
           <Text style={styles.subtitle}>{bus.busNumber} • {route.routeNumber}</Text>
         </View>
         <StatusBadge status={bus.status} />
@@ -152,7 +152,7 @@ export const LiveTrackingScreen: React.FC<LiveTrackingScreenProps> = ({
       {/* Live GPS Info Banner */}
       <View style={styles.infoBanner}>
         <Text style={styles.infoBannerText}>
-          📡 GPS updates automatically every 10 seconds. Live tracking uses SKIT driver broadcast signals.
+          Demo animation uses sample data. Live driver GPS and ETA require backend integration.
         </Text>
       </View>
     </ScrollView>

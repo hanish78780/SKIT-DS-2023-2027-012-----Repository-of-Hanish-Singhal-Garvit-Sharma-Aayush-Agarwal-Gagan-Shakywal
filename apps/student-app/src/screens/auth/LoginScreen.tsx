@@ -21,7 +21,7 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [studentId, setStudentId] = useState('SKIT/2023/CS/012');
-  const [password, setPassword] = useState('••••••••');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -136,7 +136,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
           <View style={styles.demoNote}>
             <Text style={styles.demoNoteText}>
-              💡 Demo Mode active for SKIT Jaipur testing.
+              Demo mode: enter any non-empty Student ID and password. No real account is checked.
             </Text>
           </View>
         </View>
