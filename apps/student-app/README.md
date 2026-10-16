@@ -48,8 +48,7 @@ apps/student-app/
     │   ├── PrimaryButton.tsx
     │   ├── SecondaryButton.tsx
     │   ├── LoadingState.tsx
-    │   ├── EmptyState.tsx
-    │   └── ErrorState.tsx
+    │   └── EmptyState.tsx
     ├── screens/               # App screen views
     │   ├── auth/LoginScreen.tsx
     │   ├── home/HomeScreen.tsx
@@ -67,7 +66,7 @@ apps/student-app/
     │   └── mockData.ts        # Centralized mock data
     ├── services/
     │   └── mockApi.ts         # Service layer ready for API integration
-    ├── theme/                 # Design tokens (colors, typography, shadows)
+    ├── theme/                 # Colors and shared shadows
     └── types/                 # TypeScript interfaces & types
 ```
 
