@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Menu, AlertTriangle, Clock, CheckCircle, Info, CheckCheck, Trash2, X } from 'lucide-react';
-import { useTransport } from '../context/TransportContext';
+import { useTransport } from '../context/useTransport';
 import './Navbar.css';
 
 const Navbar = ({ title = "Transport Overview", subtitle = "SKIT Jaipur Campus Transportation", onMenuClick }) => {

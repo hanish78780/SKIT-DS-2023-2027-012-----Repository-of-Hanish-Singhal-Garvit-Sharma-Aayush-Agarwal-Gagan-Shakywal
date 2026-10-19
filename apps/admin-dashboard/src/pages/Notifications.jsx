@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Bell, X, Send } from 'lucide-react';
-import { useTransport } from '../context/TransportContext';
+import { useTransport } from '../context/useTransport';
 import './Notifications.css';
 
 const Notifications = () => {

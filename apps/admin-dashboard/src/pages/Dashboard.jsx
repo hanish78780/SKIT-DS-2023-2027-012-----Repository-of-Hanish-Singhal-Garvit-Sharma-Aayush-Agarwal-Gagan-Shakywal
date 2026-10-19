@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Bus, UserRound, Users, Clock, X, Navigation, Phone, CheckCircle, Radio } from 'lucide-react';
-import { useTransport, sanitizeRouteString } from '../context/TransportContext';
+import { useTransport } from '../context/useTransport';
+import { sanitizeRouteString } from '../context/TransportProvider';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { trips: tripsList, buses, drivers, students } = useTransport();
+  const { trips: tripsList } = useTransport();
   const [modalType, setModalType] = useState(null); // 'view' | 'track' | null
   const [selectedTrip, setSelectedTrip] = useState(null);
 
