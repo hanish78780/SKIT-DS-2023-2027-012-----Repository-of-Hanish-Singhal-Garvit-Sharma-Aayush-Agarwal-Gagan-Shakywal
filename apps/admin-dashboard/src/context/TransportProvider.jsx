@@ -33,6 +33,95 @@ const initialTrips = [
   { id: 'TRIP-1020', bus: 'RJ-14-AB-2231', driver: 'Mohan Sharma', phone: '96543 21098', route: 'Route 02 (SKIT → C-Scheme)', students: 0, startTime: '08:15 AM', status: 'Cancelled', speed: '0 km/h', eta: 'Cancelled', nextStop: '—' },
 ];
 
+const initialNotifications = [
+  {
+    id: 'notif-1',
+    title: 'Route 03 Stop Updated',
+    category: 'Route Update',
+    message: 'Stop 5 location on Route 03 has been shifted to Civil Lines Metro.',
+    audience: 'Route 03 Students',
+    priority: 'Medium',
+    type: 'warning',
+    time: '10 min ago',
+    read: false,
+    timestamp: Date.now() - 10 * 60 * 1000,
+  },
+  {
+    id: 'notif-2',
+    title: 'Trip TRIP-1021 Delayed',
+    category: 'Trip Delay',
+    message: 'Bus RJ-14-AB-1088 is delayed by 15 minutes due to traffic.',
+    audience: 'Route 01 Students',
+    priority: 'High',
+    type: 'alert',
+    time: '25 min ago',
+    read: false,
+    timestamp: Date.now() - 25 * 60 * 1000,
+  },
+  {
+    id: 'notif-3',
+    title: 'Bus RJ-14-AB-2231 in Maintenance',
+    category: 'Bus Issue',
+    message: 'Bus sent for scheduled maintenance. Route 02 operating with substitute vehicle.',
+    audience: 'Route 02 Students',
+    priority: 'Medium',
+    type: 'warning',
+    time: '2 hrs ago',
+    read: true,
+    timestamp: Date.now() - 120 * 60 * 1000,
+  },
+  {
+    id: 'notif-4',
+    title: 'Holiday Notice — 15 Sep',
+    category: 'College Announcement',
+    message: 'No transport service on 15 September 2026 due to college holiday.',
+    audience: 'All Students',
+    priority: 'Low',
+    type: 'info',
+    time: 'Yesterday',
+    read: true,
+    timestamp: Date.now() - 24 * 60 * 60 * 1000,
+  },
+];
+
+/**
+ * Sanitizes route strings to guarantee balanced, single parentheses:
+ * e.g. "Route 03 (SKIT → Mansarovar))))" -> "Route 03 (SKIT → Mansarovar)"
+ */
+export const sanitizeRouteString = (str) => {
+  if (!str) return str;
+  const firstOpen = str.indexOf('(');
+  if (firstOpen === -1) {
+    return str.replace(/[()]/g, '').trim();
+  }
+  const baseRoute = str.slice(0, firstOpen).trim();
+  const inside = str.slice(firstOpen).replace(/[()]/g, '').trim();
+  if (!inside) {
+    return baseRoute;
+  }
+  return `${baseRoute} (${inside})`;
+};
+
+/**
+ * Safely combines new route with destination description without bracket duplication
+ */
+export const formatTripRoute = (newRoute, previousRoute) => {
+  const cleanNew = sanitizeRouteString(newRoute || '');
+  const cleanPrev = sanitizeRouteString(previousRoute || '');
+
+  // If cleanNew already has a destination inside brackets
+  const newMatch = cleanNew.match(/\(([^)]+)\)/);
+  if (newMatch) {
+    return cleanNew;
+  }
+
+  // Otherwise, extract destination from cleanPrev if available
+  const prevMatch = cleanPrev.match(/\(([^)]+)\)/);
+  const destination = prevMatch ? prevMatch[1].trim() : 'SKIT Campus';
+  const base = cleanNew.split('(')[0].trim() || 'Route 01';
+  return `${base} (${destination})`;
+};
+
 export const TransportProvider = ({ children }) => {
   // Load from localStorage or use initial defaults
   const [drivers, setDrivers] = useState(() => {
@@ -52,7 +141,33 @@ export const TransportProvider = ({ children }) => {
 
   const [trips, setTrips] = useState(() => {
     const saved = localStorage.getItem('unitransit_trips');
-    return saved ? JSON.parse(saved) : initialTrips;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.map((t) => ({
+          ...t,
+          route: sanitizeRouteString(t.route),
+        }));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return initialTrips;
+  });
+
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('unitransit_notifications');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].category) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return initialNotifications;
   });
 
   // Save to localStorage whenever state changes
@@ -71,6 +186,10 @@ export const TransportProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('unitransit_trips', JSON.stringify(trips));
   }, [trips]);
+
+  useEffect(() => {
+    localStorage.setItem('unitransit_notifications', JSON.stringify(notifications));
+  }, [notifications]);
 
   // --- CROSS-SYNCHRONIZATION ACTIONS ---
 
@@ -124,7 +243,7 @@ export const TransportProvider = ({ children }) => {
             driver: targetDriver.name,
             phone: targetDriver.phone,
             bus: bus && bus !== '—' ? bus : t.bus,
-            route: `${route} (${t.route.split('(')[1] || 'SKIT Campus'})`,
+            route: formatTripRoute(route, t.route),
           };
         }
         return t;
@@ -137,6 +256,12 @@ export const TransportProvider = ({ children }) => {
         prev.map((s) => (s.bus === bus ? { ...s, route: route } : s))
       );
     }
+
+    addNotification({
+      type: 'success',
+      title: 'Driver Assigned',
+      message: `${targetDriver.name} assigned to bus ${bus} on ${route}.`,
+    });
   };
 
   /**
@@ -201,6 +326,11 @@ export const TransportProvider = ({ children }) => {
         )
       );
     }
+    addNotification({
+      type: 'info',
+      title: 'New Driver Added',
+      message: `${newDriver.name} added to driver roster with license ${newDriver.license}.`,
+    });
   };
 
   /**
@@ -244,7 +374,7 @@ export const TransportProvider = ({ children }) => {
           return {
             ...t,
             driver: driver !== 'Unassigned' ? driver : t.driver,
-            route: `${route} (${t.route.split('(')[1] || 'SKIT Campus'})`,
+            route: formatTripRoute(route, t.route),
           };
         }
         return t;
@@ -255,6 +385,12 @@ export const TransportProvider = ({ children }) => {
     setStudents((prev) =>
       prev.map((s) => (s.bus === busId ? { ...s, route: route } : s))
     );
+
+    addNotification({
+      type: 'success',
+      title: 'Bus Route Assigned',
+      message: `Bus ${busId} assigned to ${route} with driver ${driver}.`,
+    });
   };
 
   /**
@@ -289,7 +425,15 @@ export const TransportProvider = ({ children }) => {
       prev.map((b) => {
         if (b.id === busId) {
           const isMaint = b.status === 'Maintenance';
-          return { ...b, status: isMaint ? 'Active' : 'Maintenance' };
+          const nextStatus = isMaint ? 'Active' : 'Maintenance';
+          addNotification({
+            type: isMaint ? 'success' : 'alert',
+            title: isMaint ? 'Bus Resumed Service' : 'Bus Scheduled for Maintenance',
+            message: isMaint
+              ? `Bus ${busId} is back in active fleet rotation.`
+              : `Bus ${busId} has been sent for servicing/inspection.`,
+          });
+          return { ...b, status: nextStatus };
         }
         return b;
       })
@@ -310,6 +454,23 @@ export const TransportProvider = ({ children }) => {
    */
   const addBus = (newBus) => {
     setBuses((prev) => [...prev, newBus]);
+    addNotification({
+      type: 'info',
+      title: 'New Bus Registered',
+      message: `Bus ${newBus.id} (${newBus.type}, ${newBus.capacity}) added to fleet.`,
+    });
+  };
+
+  /**
+   * Add a new student
+   */
+  const addStudent = (newStudent) => {
+    setStudents((prev) => [newStudent, ...prev]);
+    addNotification({
+      type: 'info',
+      title: 'New Student Enrolled',
+      message: `${newStudent.name} (${newStudent.id}) enrolled on ${newStudent.route}.`,
+    });
   };
 
   /**
@@ -331,6 +492,50 @@ export const TransportProvider = ({ children }) => {
     );
   };
 
+  /**
+   * Notification Handlers
+   */
+  const addNotification = ({
+    type = 'info',
+    title,
+    category = 'General Alert',
+    message,
+    audience = 'All Students',
+    priority = 'Medium',
+  }) => {
+    const newNotif = {
+      id: `notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      type,
+      title,
+      category,
+      message,
+      audience,
+      priority,
+      time: 'Just now',
+      read: false,
+      timestamp: Date.now(),
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
+  const markAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const clearNotification = (id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
   return (
     <TransportContext.Provider
       value={{
@@ -338,6 +543,13 @@ export const TransportProvider = ({ children }) => {
         buses,
         students,
         trips,
+        notifications,
+        unreadNotificationsCount: notifications.filter((n) => !n.read).length,
+        addNotification,
+        markAsRead,
+        markAllAsRead,
+        clearNotification,
+        clearAllNotifications,
         assignDriver,
         unassignDriver,
         toggleDriverDisabled,
@@ -347,6 +559,7 @@ export const TransportProvider = ({ children }) => {
         toggleBusMaintenance,
         editBus,
         addBus,
+        addStudent,
         updateStudent,
         unassignStudent,
       }}

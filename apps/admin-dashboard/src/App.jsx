@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Drivers from "./pages/Drivers";
 import Buses from "./pages/Buses";
+import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
 import { TransportProvider } from "./context/TransportProvider";
 import "./App.css";
 
@@ -26,6 +28,8 @@ function App() {
             <Route path="students" element={<Students />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="buses" element={<Buses />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="routes" element={<div style={{padding: '30px'}}><h2>Routes Page (WIP)</h2></div>} />
             <Route path="trips" element={<div style={{padding: '30px'}}><h2>Trips Page (WIP)</h2></div>} />
             <Route path="reports" element={<div style={{padding: '30px'}}><h2>Reports Page (WIP)</h2></div>} />

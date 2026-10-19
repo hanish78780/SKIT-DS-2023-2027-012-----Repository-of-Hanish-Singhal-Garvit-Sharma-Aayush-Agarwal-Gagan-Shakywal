@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, MapPin, Bus, UserRound, Users, Route, Clock, Bell, BarChart3, Settings, Home, LogOut, X } from 'lucide-react';
+import { useTransport } from '../context/useTransport';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const { unreadNotificationsCount = 0 } = useTransport();
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -53,13 +55,15 @@ const Sidebar = ({ isOpen, onClose }) => {
             <NavLink to="/notifications" onClick={onClose} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
               <Bell size={20} />
               <span>Notifications</span>
-              <span className="badge-red">2</span>
+              {unreadNotificationsCount > 0 && (
+                <span className="badge-red">{unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}</span>
+              )}
             </NavLink>
             <NavLink to="/analytics" onClick={onClose} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
               <BarChart3 size={20} />
               <span>Analytics</span>
             </NavLink>
-            <NavLink to="/settings" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <NavLink to="/settings" onClick={onClose} className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
               <Settings size={20} />
               <span>Settings</span>
             </NavLink>

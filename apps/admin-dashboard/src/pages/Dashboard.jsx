@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bus, UserRound, Users, Clock, X, Navigation, Phone, CheckCircle, Radio } from 'lucide-react';
 import { useTransport } from '../context/useTransport';
+import { sanitizeRouteString } from '../context/TransportProvider';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -229,7 +230,7 @@ const Dashboard = () => {
                   </td>
                   <td>{trip.bus}</td>
                   <td>{trip.driver}</td>
-                  <td>{trip.route}</td>
+                  <td>{sanitizeRouteString(trip.route)}</td>
                   <td>{trip.students}</td>
                   <td>{trip.startTime}</td>
                   <td><span className={`badge ${getBadgeClass(trip.status)}`}>{trip.status}</span></td>
@@ -261,7 +262,7 @@ const Dashboard = () => {
                 </div>
                 <div className="view-profile-info">
                   <h3>{selectedTrip.id}</h3>
-                  <p>{selectedTrip.route} · Bus {selectedTrip.bus}</p>
+                  <p>{sanitizeRouteString(selectedTrip.route)} · Bus {selectedTrip.bus}</p>
                 </div>
               </div>
 
@@ -333,7 +334,7 @@ const Dashboard = () => {
                   <Navigation size={22} />
                 </div>
                 <div className="view-profile-info">
-                  <h3>{selectedTrip.bus} ({selectedTrip.route})</h3>
+                  <h3>{selectedTrip.bus} · {sanitizeRouteString(selectedTrip.route)}</h3>
                   <p>Driver: {selectedTrip.driver} · Tel: {selectedTrip.phone}</p>
                 </div>
               </div>
