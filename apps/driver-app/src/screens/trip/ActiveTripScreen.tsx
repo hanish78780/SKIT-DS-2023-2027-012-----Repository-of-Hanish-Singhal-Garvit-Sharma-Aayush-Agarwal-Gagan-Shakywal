@@ -4,18 +4,20 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
 import GpsCoordinatesCard from '../../components/GpsCoordinatesCard';
 import GpsStatusBadge from '../../components/GpsStatusBadge';
+import UploadStatusBadge from '../../components/UploadStatusBadge';
 import MapPlaceholder from '../../components/MapPlaceholder';
 import PrimaryButton from '../../components/PrimaryButton';
 import SecondaryButton from '../../components/SecondaryButton';
 import StatusBadge from '../../components/StatusBadge';
 import {mockBus, mockRoute, mockTripMetrics} from '../../constants/mockData';
-import {LocationState, TripState} from '../../types/driver';
+import {LocationState, LocationUploadState, TripState} from '../../types/driver';
 import colors from '../../theme/colors';
 import {shadows} from '../../theme/tokens';
 
 interface ActiveTripScreenProps {
   tripState: TripState;
   locationState: LocationState;
+  uploadState?: LocationUploadState;
   onStopTrip: () => void;
   onNavigateToStudents: () => void;
 }
@@ -23,6 +25,7 @@ interface ActiveTripScreenProps {
 const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
   tripState,
   locationState,
+  uploadState,
   onStopTrip,
   onNavigateToStudents,
 }) => {
@@ -46,9 +49,12 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
             <StatusBadge status={isStarted ? 'ACTIVE' : 'NOT_STARTED'} />
           </View>
 
-          {/* GPS Status Row */}
-          <View style={styles.gpsBadgeRow}>
+          {/* GPS & Server Sync Status Row */}
+          <View style={styles.badgeRow}>
             <GpsStatusBadge status={locationState.status} />
+            {uploadState && isStarted ? (
+              <UploadStatusBadge status={uploadState.status} />
+            ) : null}
           </View>
 
           {/* GPS error message */}
@@ -57,7 +63,15 @@ const ActiveTripScreen: React.FC<ActiveTripScreenProps> = ({
               ⚠ {locationState.errorMessage}
             </Text>
           ) : null}
+
+          {/* Upload error/warning message */}
+          {uploadState?.errorMessage && isStarted ? (
+            <Text style={styles.uploadWarningText} numberOfLines={2}>
+              ℹ {uploadState.errorMessage}
+            </Text>
+          ) : null}
         </View>
+
 
         {/* Live GPS Coordinates (debug info) */}
         {isTracking ? (
@@ -176,11 +190,21 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '500',
   },
-  gpsBadgeRow: {
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginTop: 10,
   },
   gpsErrorText: {
     color: colors.error,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 6,
+    lineHeight: 16,
+  },
+  uploadWarningText: {
+    color: colors.warning,
     fontSize: 12,
     fontWeight: '500',
     marginTop: 6,

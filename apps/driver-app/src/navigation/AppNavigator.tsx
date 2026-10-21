@@ -23,8 +23,16 @@ const AppNavigator: React.FC = () => {
   const [tripState, setTripState] = useState<TripState>('NOT_STARTED');
   const [showTripSummaryModal, setShowTripSummaryModal] = useState<boolean>(false);
 
+  // Active trip & driver credentials for API location upload
+  const [activeTripId] = useState<string>('6ad90873078dc055e14277ee');
+  const [authToken] = useState<string>('driver_dev_auth_jwt_token');
+
   // GPS foreground location hook – shared across Dashboard and ActiveTrip
-  const {locationState, startTracking, stopTracking} = useLocation();
+  const {locationState, uploadState, startTracking, stopTracking} = useLocation({
+    tripId: activeTripId,
+    authToken,
+    uploadIntervalMs: 5000,
+  });
 
   const handleFinishSplash = () => {
     setScreenState('AUTH');
@@ -37,7 +45,7 @@ const AppNavigator: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Stop GPS tracking when driver logs out
+    // Stop GPS tracking and abort in-flight uploads when driver logs out
     stopTracking();
     setTripState('NOT_STARTED');
     setScreenState('AUTH');
@@ -46,12 +54,15 @@ const AppNavigator: React.FC = () => {
 
   const handleToggleTrip = () => {
     if (tripState === 'NOT_STARTED') {
-      // Start trip → request GPS and navigate to ActiveTrip
+      // Start trip → request GPS, initiate API upload, and navigate to ActiveTrip
       setTripState('TRIP_STARTED');
       setActiveTab('activeTrip');
-      startTracking();
+      startTracking({
+        tripId: activeTripId,
+        authToken,
+      });
     } else {
-      // Stop trip → stop GPS and show summary
+      // Stop trip → stop GPS, abort uploads, and show summary
       stopTracking();
       setTripState('NOT_STARTED');
       setShowTripSummaryModal(true);
@@ -76,6 +87,7 @@ const AppNavigator: React.FC = () => {
           <ActiveTripScreen
             tripState={tripState}
             locationState={locationState}
+            uploadState={uploadState}
             onStopTrip={handleToggleTrip}
             onNavigateToStudents={() => setActiveTab('students')}
           />

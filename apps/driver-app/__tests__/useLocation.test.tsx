@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { useLocation, UseLocationReturn } from '../src/hooks/useLocation';
+import { useLocation, UseLocationOptions, UseLocationReturn } from '../src/hooks/useLocation';
 import { LocationCoordinates } from '../src/types/driver';
 import {
   checkLocationPermission,
@@ -12,6 +12,7 @@ import {
   startLocationUpdates,
   stopLocationUpdates,
 } from '../src/services/locationService';
+import { TripLocationUploader } from '../src/services/tripLocationApi';
 
 jest.mock('@react-native-community/geolocation', () => ({
   __esModule: true,
@@ -58,16 +59,17 @@ let changeState: (state: AppStateStatus) => void;
 let callbacks: LocationWatchCallbacks[];
 let removeListener: jest.Mock;
 
-function Harness() {
-  api = useLocation();
+function Harness({ options }: { options?: UseLocationOptions }) {
+  api = useLocation(options);
   return null;
 }
 
-async function mount() {
+async function mount(options?: UseLocationOptions) {
   await act(async () => {
-    component = ReactTestRenderer.create(<Harness />);
+    component = ReactTestRenderer.create(<Harness options={options} />);
   });
 }
+
 
 async function start() {
   await act(async () => {
@@ -401,3 +403,68 @@ it('handles synchronous watcher startup failure without rejecting the trip actio
   expect(api.locationState.status).toBe('error');
   expect(api.locationState.coordinates).toBeNull();
 });
+
+describe('useLocation active-trip upload integration', () => {
+  it('enqueues GPS fixes to TripLocationUploader when tripId and authToken are provided', async () => {
+    const startSpy = jest.spyOn(TripLocationUploader.prototype, 'start');
+    const enqueueSpy = jest.spyOn(TripLocationUploader.prototype, 'enqueueLocation');
+    const stopSpy = jest.spyOn(TripLocationUploader.prototype, 'stop');
+
+    await mount({
+      tripId: '6ad90873078dc055e14277ee',
+      authToken: 'test_token',
+      uploadIntervalMs: 5000,
+    });
+
+    expect(api.uploadState.status).toBe('idle');
+
+    await start();
+
+    expect(startSpy).toHaveBeenCalledWith({
+      tripId: '6ad90873078dc055e14277ee',
+      authToken: 'test_token',
+      baseUrl: undefined,
+      uploadIntervalMs: 5000,
+    });
+
+    // Initial fix enqueued
+    expect(enqueueSpy).toHaveBeenCalledWith(coordinates);
+
+    // Watcher fix enqueued
+    const nextCoords = { ...coordinates, latitude: 26.8690 };
+    act(() => callbacks[0].onLocation(nextCoords));
+    expect(enqueueSpy).toHaveBeenCalledWith(nextCoords);
+
+    // Stop tracking stops uploader
+    act(() => api.stopTracking());
+    expect(stopSpy).toHaveBeenCalled();
+    expect(api.uploadState.status).toBe('idle');
+
+    startSpy.mockRestore();
+    enqueueSpy.mockRestore();
+    stopSpy.mockRestore();
+  });
+
+  it('stops uploader and resets uploadState when app moves to background', async () => {
+    const stopSpy = jest.spyOn(TripLocationUploader.prototype, 'stop');
+
+    await mount();
+    await act(async () => {
+      await api.startTracking({
+        tripId: '6ad90873078dc055e14277ee',
+        authToken: 'test_token',
+      });
+    });
+
+    expect(api.locationState.status).toBe('tracking');
+
+    await setAppState('background');
+
+    expect(stopSpy).toHaveBeenCalled();
+    expect(api.locationState.status).toBe('idle');
+    expect(api.uploadState.status).toBe('idle');
+
+    stopSpy.mockRestore();
+  });
+});
+

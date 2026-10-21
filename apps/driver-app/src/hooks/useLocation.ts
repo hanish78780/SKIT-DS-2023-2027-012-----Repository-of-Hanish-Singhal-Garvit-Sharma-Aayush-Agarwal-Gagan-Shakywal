@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { LocationState, LocationStatus } from '../types/driver';
+import { LocationState, LocationStatus, LocationUploadState } from '../types/driver';
 import {
   checkLocationPermission,
   describeGeoError,
@@ -12,6 +12,10 @@ import {
   startLocationUpdates,
   stopLocationUpdates,
 } from '../services/locationService';
+import {
+  INITIAL_UPLOAD_STATE,
+  TripLocationUploader,
+} from '../services/tripLocationApi';
 
 const INITIAL_STATE: LocationState = {
   status: 'idle',
@@ -19,15 +23,26 @@ const INITIAL_STATE: LocationState = {
   errorMessage: null,
 };
 
+export interface UseLocationOptions {
+  tripId?: string | null;
+  authToken?: string | null;
+  baseUrl?: string;
+  uploadIntervalMs?: number;
+}
+
 export interface UseLocationReturn {
   locationState: LocationState;
-  startTracking: () => Promise<void>;
+  uploadState: LocationUploadState;
+  startTracking: (tripContext?: { tripId?: string; authToken?: string }) => Promise<void>;
   stopTracking: () => void;
 }
 
-export function useLocation(): UseLocationReturn {
+export function useLocation(options?: UseLocationOptions): UseLocationReturn {
   const [locationState, setLocationState] =
     useState<LocationState>(INITIAL_STATE);
+  const [uploadState, setUploadState] =
+    useState<LocationUploadState>(INITIAL_UPLOAD_STATE);
+
   const watcherIdRef = useRef<number | null>(null);
   const sessionRef = useRef(0);
   const startingSessionRef = useRef<number | null>(null);
@@ -35,6 +50,18 @@ export function useLocation(): UseLocationReturn {
   const mountedRef = useRef(true);
   const appStateRef = useRef<string | null>(AppState.currentState ?? null);
   const permissionPromiseRef = useRef<Promise<PermissionResult> | null>(null);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+  const activeTripContextRef = useRef<{ tripId?: string; authToken?: string } | null>(null);
+
+  const uploaderRef = useRef<TripLocationUploader | null>(null);
+  if (!uploaderRef.current) {
+    uploaderRef.current = new TripLocationUploader(state => {
+      if (mountedRef.current) {
+        setUploadState(state);
+      }
+    });
+  }
 
   const isForeground = useCallback(
     () => appStateRef.current === 'active' || appStateRef.current === null,
@@ -136,6 +163,9 @@ export function useLocation(): UseLocationReturn {
           coordinates,
           errorMessage: null,
         });
+        if (uploaderRef.current) {
+          uploaderRef.current.enqueueLocation(coordinates);
+        }
       } catch (error) {
         if (!isCurrent()) {
           return;
@@ -159,6 +189,9 @@ export function useLocation(): UseLocationReturn {
               coordinates,
               errorMessage: null,
             });
+            if (uploaderRef.current) {
+              uploaderRef.current.enqueueLocation(coordinates);
+            }
           }
         },
         onError: (message, code) => {
@@ -208,16 +241,41 @@ export function useLocation(): UseLocationReturn {
     }
   }, [getPermission, isForeground]);
 
-  const startTracking = useCallback(async () => {
-    trackingRequestedRef.current = true;
-    await beginSession();
-  }, [beginSession]);
+  const startTracking = useCallback(
+    async (tripContext?: { tripId?: string; authToken?: string }) => {
+      if (tripContext) {
+        activeTripContextRef.current = tripContext;
+      }
+      const effectiveTripId =
+        tripContext?.tripId ?? optionsRef.current?.tripId ?? null;
+      const effectiveToken =
+        tripContext?.authToken ?? optionsRef.current?.authToken ?? null;
+
+      if (effectiveTripId && effectiveToken && uploaderRef.current) {
+        uploaderRef.current.start({
+          tripId: effectiveTripId,
+          authToken: effectiveToken,
+          baseUrl: optionsRef.current?.baseUrl,
+          uploadIntervalMs: optionsRef.current?.uploadIntervalMs,
+        });
+      }
+
+      trackingRequestedRef.current = true;
+      await beginSession();
+    },
+    [beginSession],
+  );
 
   const stopTracking = useCallback(() => {
     trackingRequestedRef.current = false;
+    activeTripContextRef.current = null;
+    if (uploaderRef.current) {
+      uploaderRef.current.stop();
+    }
     cancelSession();
     if (mountedRef.current) {
       setLocationState(INITIAL_STATE);
+      setUploadState(INITIAL_UPLOAD_STATE);
     }
   }, [cancelSession]);
 
@@ -227,9 +285,29 @@ export function useLocation(): UseLocationReturn {
       const wasForeground = isForeground();
       appStateRef.current = nextState;
       if (!isForeground()) {
+        if (uploaderRef.current) {
+          uploaderRef.current.stop();
+        }
         cancelSession();
         setLocationState(INITIAL_STATE);
+        setUploadState(INITIAL_UPLOAD_STATE);
       } else if (!wasForeground && trackingRequestedRef.current) {
+        const effectiveTripId =
+          activeTripContextRef.current?.tripId ??
+          optionsRef.current?.tripId ??
+          null;
+        const effectiveToken =
+          activeTripContextRef.current?.authToken ??
+          optionsRef.current?.authToken ??
+          null;
+        if (effectiveTripId && effectiveToken && uploaderRef.current) {
+          uploaderRef.current.start({
+            tripId: effectiveTripId,
+            authToken: effectiveToken,
+            baseUrl: optionsRef.current?.baseUrl,
+            uploadIntervalMs: optionsRef.current?.uploadIntervalMs,
+          });
+        }
         beginSession().catch(error => {
           console.warn('[useLocation] resume failed:', error);
         });
@@ -239,10 +317,14 @@ export function useLocation(): UseLocationReturn {
     return () => {
       mountedRef.current = false;
       trackingRequestedRef.current = false;
+      activeTripContextRef.current = null;
+      if (uploaderRef.current) {
+        uploaderRef.current.stop();
+      }
       cancelSession();
       subscription.remove();
     };
   }, [beginSession, cancelSession, isForeground]);
 
-  return { locationState, startTracking, stopTracking };
+  return { locationState, uploadState, startTracking, stopTracking };
 }
