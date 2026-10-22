@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const locationSchema = new mongoose.Schema({
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
+  accuracy: { type: Number },
   recordedAt: { type: Date, default: Date.now }
 }, { _id: false });
 
@@ -15,5 +16,7 @@ const tripSchema = new mongoose.Schema({
   endedAt: Date,
   currentLocation: locationSchema
 }, { timestamps: true });
+
+tripSchema.index({ driver: 1, status: 1 });
 
 export default mongoose.model("Trip", tripSchema);

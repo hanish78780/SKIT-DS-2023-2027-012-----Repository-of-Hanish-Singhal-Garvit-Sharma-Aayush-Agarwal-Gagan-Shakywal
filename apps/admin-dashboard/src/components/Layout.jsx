@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -17,6 +17,18 @@ const Layout = () => {
   } else if (location.pathname.includes('/students')) {
     title = "Student Management";
     subtitle = "1,240 enrolled students";
+  } else if (location.pathname.includes('/drivers')) {
+    title = "Driver Management";
+    subtitle = "All registered drivers";
+  } else if (location.pathname.includes('/buses')) {
+    title = "Bus Management";
+    subtitle = "All registered buses · SKIT Fleet";
+  } else if (location.pathname.includes('/notifications')) {
+    title = "Transport Notifications";
+    subtitle = "Send & manage alerts";
+  } else if (location.pathname.includes('/settings')) {
+    title = "Settings";
+    subtitle = "System configuration";
   }
 
   return (

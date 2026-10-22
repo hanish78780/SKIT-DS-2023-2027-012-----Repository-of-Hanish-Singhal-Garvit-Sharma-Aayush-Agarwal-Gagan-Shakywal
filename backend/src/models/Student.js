@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "./Route.js";
 
 const studentSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },

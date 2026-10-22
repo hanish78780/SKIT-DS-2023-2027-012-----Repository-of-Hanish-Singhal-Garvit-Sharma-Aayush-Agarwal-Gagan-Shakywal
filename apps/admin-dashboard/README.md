@@ -1,40 +1,47 @@
-# UniTransit - Admin Dashboard 🚍
+# UniTransit Admin Dashboard
 
-This is the central administrative portal for the **UniTransit College Transportation Management System**. It allows administrators to manage buses, drivers, students, routes, and track live trips.
+React and Vite administration interface for the UniTransit college transport project.
 
-## Tech Stack
-- **Framework:** React.js + Vite
-- **Styling:** Vanilla CSS (Responsive, matching Figma designs)
-- **Icons:** `lucide-react`
-- **Routing:** React Router (v6+)
+## Current behavior
 
-## How to Run Locally
+- Demo sign-in accepts a non-empty email and password. Authentication is held in memory and resets on reload.
+- The dashboard shows sample trips and map illustrations. These are not live GPS positions.
+- Students, Drivers, and Buses pages support the existing assignment and management dialogs.
+- `TransportProvider` stores demo buses, drivers, students, and trips in this browser's `localStorage`; this module does not call the backend yet.
+- Routes, Trips, and Reports currently show work-in-progress placeholders. Other planned sidebar destinations do not yet have page implementations.
 
-1. Make sure you have Node.js installed.
-2. Navigate to this directory (`apps/admin-dashboard`).
-3. Install the dependencies:
-   ```bash
-   npm install
-   ```
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-5. Open your browser to the local address provided (usually `http://localhost:5173`).
+## Run locally
 
-## Project Progress
+Use Node.js 22.12 or newer in the Node 22 release line, or Node.js 24, with npm.
 
-### ✅ Week 1: Foundation
-- Monorepo setup initialized.
-- Created the basic `admin-dashboard` React/Vite app.
-- Built the initial static layout shell (Sidebar, Navbar, Dashboard overview) with mock data.
+```powershell
+cd apps/admin-dashboard
+npm ci
+npm run dev
+```
 
-### 🚧 Week 2: Advanced UI & Routing
-- **Day 1:** Built the standalone Admin Login (Sign-In) screen with a split-screen design, perfectly matching the official Figma design. Added mock authentication state to protect the dashboard.
-- *(Upcoming)* **Day 2:** Refactoring the monolithic layout into reusable components (`Sidebar.jsx`, `Navbar.jsx`, `Layout.jsx`) and introducing React Router for page navigation.
-- *(Upcoming)* **Days 3-7:** Building out dedicated pages for Students, Drivers, Buses, Routes, and Live Tracking.
+Open the local URL printed by Vite, normally `http://localhost:5173`.
 
-## Team Guidelines
-- This module is maintained exclusively by the Admin Dashboard developer.
-- Do NOT make direct changes to the `driver-app` or `student-app` folders.
-- Ensure all UI changes are responsive (mobile and tablet friendly) before committing.
+```powershell
+npm run lint
+npm run build
+npm run preview
+```
+
+`build` writes the production bundle to the ignored `dist/` directory. `preview` serves that bundle locally. To reset demo records, remove the `unitransit_drivers`, `unitransit_buses`, `unitransit_students`, and `unitransit_trips` keys from this site's local storage.
+
+## Structure
+
+```text
+public/              Images used by the app and browser icon
+src/
+  components/        Shared layout, sidebar, and navigation bar
+  context/           Transport data context, provider, and consumer hook
+  pages/             Page components with their styles
+  App.jsx            Demo authentication and routes
+  App.css            App-wide typography and resets
+  index.css          Root sizing
+  main.jsx           React entry point
+```
+
+React Router handles page navigation, Lucide supplies icons, and styles use plain CSS. Keep this module's changes within the repository's feature-branch and pull-request workflow.

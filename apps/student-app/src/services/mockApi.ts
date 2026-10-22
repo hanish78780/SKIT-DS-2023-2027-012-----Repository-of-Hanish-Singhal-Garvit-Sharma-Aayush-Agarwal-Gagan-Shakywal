@@ -17,6 +17,9 @@ import {
 } from '../types';
 
 export class MockApiService {
+  // Demo state lasts for this app session only; no backend or device storage is used.
+  private static notifications: NotificationItem[] = mockNotifications.map(item => ({ ...item }));
+
   static async loginStudent(emailOrId: string, _password: string): Promise<StudentProfile> {
     await new Promise(resolve => setTimeout(() => resolve(true), 600));
     if (!emailOrId.trim()) {
@@ -47,7 +50,19 @@ export class MockApiService {
 
   static async getNotifications(): Promise<NotificationItem[]> {
     await new Promise(resolve => setTimeout(() => resolve(true), 300));
-    return mockNotifications;
+    return this.notifications.map(item => ({ ...item }));
+  }
+
+  static markNotificationRead(id: string): NotificationItem[] {
+    this.notifications = this.notifications.map(item =>
+      item.id === id ? { ...item, isRead: true } : item
+    );
+    return this.notifications.map(item => ({ ...item }));
+  }
+
+  static markAllNotificationsRead(): NotificationItem[] {
+    this.notifications = this.notifications.map(item => ({ ...item, isRead: true }));
+    return this.notifications.map(item => ({ ...item }));
   }
 
   static async submitIssueReport(payload: IssueReportPayload): Promise<{ success: boolean; ticketId: string }> {

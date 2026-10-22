@@ -28,15 +28,11 @@ export const NotificationsScreen: React.FC = () => {
   }, []);
 
   const handleMarkAllRead = () => {
-    setNotifications(prev =>
-      prev.map(item => ({ ...item, isRead: true }))
-    );
+    setNotifications(MockApiService.markAllNotificationsRead());
   };
 
   const handleNotificationPress = (id: string) => {
-    setNotifications(prev =>
-      prev.map(item => (item.id === id ? { ...item, isRead: true } : item))
-    );
+    setNotifications(MockApiService.markNotificationRead(id));
   };
 
   if (loading) {
@@ -58,7 +54,11 @@ export const NotificationsScreen: React.FC = () => {
           <Text style={styles.title}>Notifications</Text>
           <Text style={styles.subTitle}>Stay updated on route changes & bus alerts</Text>
         </View>
-        <Pressable onPress={handleMarkAllRead} style={styles.markReadBtn}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Mark all read"
+          onPress={handleMarkAllRead}
+          style={styles.markReadBtn}>
           <Text style={styles.markReadText}>Mark all read</Text>
         </Pressable>
       </View>

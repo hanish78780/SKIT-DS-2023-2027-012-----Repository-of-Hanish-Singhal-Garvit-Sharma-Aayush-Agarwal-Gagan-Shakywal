@@ -112,7 +112,7 @@ export const MockMap: React.FC<MockMapProps> = ({
         <View style={styles.floatingTopBar}>
           <View style={[styles.liveStatusChip, shadows.sm]}>
             <View style={styles.liveGreenDot} />
-            <Text style={styles.liveStatusText}>LIVE GPS TRACKING</Text>
+            <Text style={styles.liveStatusText}>SIMULATED BUS</Text>
           </View>
 
           <View style={[styles.speedChip, shadows.sm]}>
