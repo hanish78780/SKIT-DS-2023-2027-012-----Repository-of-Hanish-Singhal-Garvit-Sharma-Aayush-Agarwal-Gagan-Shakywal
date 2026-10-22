@@ -109,3 +109,21 @@ export interface LocationState {
   coordinates: LocationCoordinates | null;
   errorMessage: string | null;
 }
+
+// ─── GPS Upload / Backend Ingestion Types ─────────────────────────────────────
+
+export type LocationUploadStatus =
+  | 'idle'
+  | 'uploading'
+  | 'synced'
+  | 'retry_pending'
+  | 'error';
+
+export interface LocationUploadState {
+  status: LocationUploadStatus;
+  lastSuccessfulUpload: LocationCoordinates | null;
+  lastUploadedAt: number | null;
+  errorMessage: string | null;
+  retryCount: number;
+}
+
