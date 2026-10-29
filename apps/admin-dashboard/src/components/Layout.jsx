@@ -20,6 +20,9 @@ const Layout = () => {
   } else if (location.pathname.includes('/routes')) {
     title = "Routes & Stops";
     subtitle = "Campus transportation network";
+  } else if (location.pathname.includes('/trips')) {
+    title = "Trip Management";
+    subtitle = "All trips · Today";
   } else if (location.pathname.includes('/students')) {
     title = "Student Management";
     subtitle = "1,240 enrolled students";

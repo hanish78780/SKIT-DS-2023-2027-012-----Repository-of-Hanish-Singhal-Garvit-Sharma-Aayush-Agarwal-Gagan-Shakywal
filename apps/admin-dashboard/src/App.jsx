@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import LiveTracking from "./pages/LiveTracking";
 import RoutesPage from "./pages/Routes";
+import Trips from "./pages/Trips";
 import Students from "./pages/Students";
 import Drivers from "./pages/Drivers";
 import Buses from "./pages/Buses";
@@ -29,12 +30,12 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="live-tracking" element={<LiveTracking />} />
             <Route path="routes" element={<RoutesPage />} />
+            <Route path="trips" element={<Trips />} />
             <Route path="students" element={<Students />} />
             <Route path="drivers" element={<Drivers />} />
             <Route path="buses" element={<Buses />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="trips" element={<div style={{padding: '30px'}}><h2>Trips Page (WIP)</h2></div>} />
             <Route path="reports" element={<div style={{padding: '30px'}}><h2>Reports Page (WIP)</h2></div>} />
           </Route>
         </Routes>

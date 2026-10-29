@@ -1,0 +1,239 @@
+.trips-page {
+  padding: 24px 32px;
+  background-color: #f4f7fb;
+  min-height: calc(100vh - 75px);
+  box-sizing: border-box;
+}
+
+/* Filter Tabs Bar */
+.trips-tabs-bar {
+  display: inline-flex;
+  background: #e8edf5;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+
+.trip-tab-btn {
+  padding: 8px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trip-tab-btn:hover:not(.active) {
+  color: #0f172a;
+}
+
+.trip-tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Trip Records Card */
+.trip-records-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.trip-records-header {
+  margin-bottom: 20px;
+}
+
+.trip-records-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.trip-records-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Data Table */
+.trips-table-wrapper {
+  overflow-x: auto;
+}
+
+.trips-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.trips-table th {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  white-space: nowrap;
+}
+
+.trips-table td {
+  padding: 16px;
+  font-size: 13px;
+  color: #334155;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.trips-table tr:hover td {
+  background: #f8fafc;
+}
+
+.trips-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Table Elements */
+.trip-id-link {
+  color: #2563eb;
+  font-weight: 700;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+
+.trip-id-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.trip-bus-text {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.trip-driver-text {
+  color: #334155;
+  font-weight: 500;
+}
+
+.trip-route-text {
+  color: #334155;
+  font-weight: 500;
+}
+
+.trip-students-text {
+  color: #334155;
+  font-weight: 500;
+}
+
+.trip-start-text {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Status Badges */
+.trip-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  text-align: center;
+}
+
+.trip-status-badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.trip-status-badge.scheduled {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.trip-status-badge.completed {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.trip-status-badge.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.trip-status-badge.delayed {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* Actions Column */
+.trip-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.btn-action-view {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.btn-action-view:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.btn-action-details {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.btn-action-details:hover {
+  text-decoration: underline;
+  color: #2563eb;
+}
+
+/* Empty Table State */
+.trips-empty-row {
+  text-align: center;
+  padding: 40px !important;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .trips-page {
+    padding: 16px;
+  }
+  .trip-records-card {
+    padding: 18px 20px;
+  }
+}
