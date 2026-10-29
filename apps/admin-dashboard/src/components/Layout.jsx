@@ -35,6 +35,9 @@ const Layout = () => {
   } else if (location.pathname.includes('/notifications')) {
     title = "Transport Notifications";
     subtitle = "Send & manage alerts";
+  } else if (location.pathname.includes('/analytics') || location.pathname.includes('/reports')) {
+    title = "Reports & Analytics";
+    subtitle = "Transport performance insights";
   } else if (location.pathname.includes('/settings')) {
     title = "Settings";
     subtitle = "System configuration";
