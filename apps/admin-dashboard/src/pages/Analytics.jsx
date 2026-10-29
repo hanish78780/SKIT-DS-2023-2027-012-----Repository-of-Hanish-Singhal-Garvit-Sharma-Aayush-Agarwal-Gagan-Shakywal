@@ -2,9 +2,6 @@ import { useState } from 'react';
 import './Analytics.css';
 
 const Analytics = () => {
-  const [hoveredTripDay, setHoveredTripDay] = useState(null);
-  const [hoveredRouteBar, setHoveredRouteBar] = useState(null);
-
   // Trips This Week line data
   const weeklyTrips = [
     { day: 'Mon', count: 32, x: 50, y: 110 },
@@ -22,6 +19,18 @@ const Analytics = () => {
     { route: 'R-03', percent: 95, x: 250, height: 152, y: 28 },
     { route: 'R-04', percent: 60, x: 340, height: 96, y: 84 },
   ];
+
+  // Default selections to match user screenshots perfectly:
+  // Screenshot 1: Wed (trips: 34)
+  // Screenshot 2: R-01 (util: 85)
+  // Screenshot 3: Completed: 28
+  const [selectedTripDay, setSelectedTripDay] = useState(weeklyTrips[2]); // Wed
+  const [selectedRouteBar, setSelectedRouteBar] = useState(routeUtilization[0]); // R-01
+  const [selectedDonutSlice, setSelectedDonutSlice] = useState({
+    label: 'Completed',
+    count: 28,
+    color: '#16a34a',
+  });
 
   // Donut chart math (Radius = 60, Circumference = 2 * PI * 60 = 376.99)
   const totalTrips = 36;
@@ -63,10 +72,7 @@ const Analytics = () => {
         <div className="analytics-card">
           <div className="analytics-card-header">
             <h3>Trips This Week</h3>
-            <p>
-              Daily trip count
-              {hoveredTripDay && ` · ${hoveredTripDay.day}: ${hoveredTripDay.count} trips`}
-            </p>
+            <p>Daily trip count</p>
           </div>
 
           <div className="chart-container">
@@ -100,6 +106,18 @@ const Analytics = () => {
                 </text>
               ))}
 
+              {/* Vertical guideline for active/selected day */}
+              {selectedTripDay && (
+                <line
+                  x1={selectedTripDay.x}
+                  y1={selectedTripDay.y}
+                  x2={selectedTripDay.x}
+                  y2="195"
+                  stroke="#cbd5e1"
+                  strokeWidth="1.5"
+                />
+              )}
+
               {/* Smooth blue spline curve */}
               <path
                 d="M 50 110 C 85 98, 95 90, 120 88 C 150 86, 165 96, 190 98 C 220 100, 235 80, 260 78 C 290 76, 305 86, 330 88 C 365 90, 375 145, 400 165"
@@ -110,34 +128,39 @@ const Analytics = () => {
               />
 
               {/* Data points */}
-              {weeklyTrips.map((pt) => (
-                <g key={pt.day}>
+              {weeklyTrips.map((pt) => {
+                const isSelected = selectedTripDay?.day === pt.day;
+                return (
                   <circle
+                    key={pt.day}
                     cx={pt.x}
                     cy={pt.y}
-                    r={hoveredTripDay?.day === pt.day ? "6" : "4.5"}
+                    r={isSelected ? 6 : 4.5}
                     fill="#2563eb"
                     stroke="#ffffff"
                     strokeWidth="2.5"
                     className="chart-data-dot"
-                    onMouseEnter={() => setHoveredTripDay(pt)}
-                    onMouseLeave={() => setHoveredTripDay(null)}
+                    onClick={() => setSelectedTripDay(pt)}
+                    onMouseEnter={() => setSelectedTripDay(pt)}
                   />
-                  {hoveredTripDay?.day === pt.day && (
-                    <text
-                      x={pt.x}
-                      y={pt.y - 12}
-                      textAnchor="middle"
-                      fill="#0f172a"
-                      fontSize="11"
-                      fontWeight="700"
-                    >
-                      {pt.count}
-                    </text>
-                  )}
-                </g>
-              ))}
+                );
+              })}
             </svg>
+
+            {/* Floating Tooltip Card (Matching Screenshot 1) */}
+            {selectedTripDay && (
+              <div
+                className="chart-floating-tooltip"
+                style={{
+                  left: `${(selectedTripDay.x / 450) * 100}%`,
+                  top: `${(selectedTripDay.y / 220) * 100}%`,
+                  transform: 'translate(10px, 4px)',
+                }}
+              >
+                <span className="tooltip-title">{selectedTripDay.day}</span>
+                <span className="tooltip-value blue">trips : {selectedTripDay.count}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -145,10 +168,7 @@ const Analytics = () => {
         <div className="analytics-card">
           <div className="analytics-card-header">
             <h3>Bus Utilization</h3>
-            <p>
-              By route (%)
-              {hoveredRouteBar && ` · ${hoveredRouteBar.route}: ${hoveredRouteBar.percent}%`}
-            </p>
+            <p>By route (%)</p>
           </div>
 
           <div className="chart-container">
@@ -182,36 +202,52 @@ const Analytics = () => {
                 </text>
               ))}
 
+              {/* Background gray highlight column for selected bar (Matching Screenshot 2) */}
+              {selectedRouteBar && (
+                <rect
+                  x={selectedRouteBar.x - 10}
+                  y="20"
+                  width="52"
+                  height="165"
+                  rx="6"
+                  ry="6"
+                  fill="#cbd5e1"
+                  opacity="0.65"
+                />
+              )}
+
               {/* Blue Rounded Bars */}
               {routeUtilization.map((bar) => (
-                <g key={bar.route}>
-                  <rect
-                    x={bar.x}
-                    y={bar.y}
-                    width="32"
-                    height={bar.height}
-                    rx="8"
-                    ry="8"
-                    fill={hoveredRouteBar?.route === bar.route ? "#1d4ed8" : "#2563eb"}
-                    className="chart-bar"
-                    onMouseEnter={() => setHoveredRouteBar(bar)}
-                    onMouseLeave={() => setHoveredRouteBar(null)}
-                  />
-                  {hoveredRouteBar?.route === bar.route && (
-                    <text
-                      x={bar.x + 16}
-                      y={bar.y - 8}
-                      textAnchor="middle"
-                      fill="#0f172a"
-                      fontSize="11"
-                      fontWeight="700"
-                    >
-                      {bar.percent}%
-                    </text>
-                  )}
-                </g>
+                <rect
+                  key={bar.route}
+                  x={bar.x}
+                  y={bar.y}
+                  width="32"
+                  height={bar.height}
+                  rx="8"
+                  ry="8"
+                  fill="#2563eb"
+                  className="chart-bar"
+                  onClick={() => setSelectedRouteBar(bar)}
+                  onMouseEnter={() => setSelectedRouteBar(bar)}
+                />
               ))}
             </svg>
+
+            {/* Floating Tooltip Card (Matching Screenshot 2) */}
+            {selectedRouteBar && (
+              <div
+                className="chart-floating-tooltip"
+                style={{
+                  left: `${((selectedRouteBar.x + 36) / 450) * 100}%`,
+                  top: `${((selectedRouteBar.y + 60) / 220) * 100}%`,
+                  transform: 'translate(4px, 4px)',
+                }}
+              >
+                <span className="tooltip-title">{selectedRouteBar.route}</span>
+                <span className="tooltip-value blue">util : {selectedRouteBar.percent}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -249,6 +285,13 @@ const Analytics = () => {
                   strokeWidth="22"
                   strokeDasharray={`${completedStroke - 4} ${circumference}`}
                   strokeDashoffset="0"
+                  className="donut-slice"
+                  onClick={() =>
+                    setSelectedDonutSlice({ label: 'Completed', count: 28, color: '#16a34a' })
+                  }
+                  onMouseEnter={() =>
+                    setSelectedDonutSlice({ label: 'Completed', count: 28, color: '#16a34a' })
+                  }
                 />
 
                 {/* 2. Active (5 trips ~ 13.9%) -> Blue */}
@@ -261,6 +304,13 @@ const Analytics = () => {
                   strokeWidth="22"
                   strokeDasharray={`${activeStroke - 4} ${circumference}`}
                   strokeDashoffset={`-${completedStroke}`}
+                  className="donut-slice"
+                  onClick={() =>
+                    setSelectedDonutSlice({ label: 'Active', count: 5, color: '#2563eb' })
+                  }
+                  onMouseEnter={() =>
+                    setSelectedDonutSlice({ label: 'Active', count: 5, color: '#2563eb' })
+                  }
                 />
 
                 {/* 3. Delayed (2 trips ~ 5.5%) -> Orange */}
@@ -273,6 +323,13 @@ const Analytics = () => {
                   strokeWidth="22"
                   strokeDasharray={`${delayedStroke - 3} ${circumference}`}
                   strokeDashoffset={`-${completedStroke + activeStroke}`}
+                  className="donut-slice"
+                  onClick={() =>
+                    setSelectedDonutSlice({ label: 'Delayed', count: 2, color: '#ea580c' })
+                  }
+                  onMouseEnter={() =>
+                    setSelectedDonutSlice({ label: 'Delayed', count: 2, color: '#ea580c' })
+                  }
                 />
 
                 {/* 4. Cancelled (1 trip ~ 2.8%) -> Red */}
@@ -285,39 +342,76 @@ const Analytics = () => {
                   strokeWidth="22"
                   strokeDasharray={`${cancelledStroke - 2} ${circumference}`}
                   strokeDashoffset={`-${completedStroke + activeStroke + delayedStroke}`}
+                  className="donut-slice"
+                  onClick={() =>
+                    setSelectedDonutSlice({ label: 'Cancelled', count: 1, color: '#dc2626' })
+                  }
+                  onMouseEnter={() =>
+                    setSelectedDonutSlice({ label: 'Cancelled', count: 1, color: '#dc2626' })
+                  }
                 />
               </svg>
-
-              <div className="donut-center-text">
-                <span className="donut-total-num">36</span>
-                <span className="donut-total-label">Trips</span>
-              </div>
             </div>
+
+            {/* Floating Tooltip Box over Donut (Matching Screenshot 3) */}
+            {selectedDonutSlice && (
+              <div
+                className="donut-floating-tooltip"
+                style={{
+                  left: '12%',
+                  top: '52%',
+                }}
+              >
+                <span className="donut-tooltip-text" style={{ color: selectedDonutSlice.color }}>
+                  {selectedDonutSlice.label} : {selectedDonutSlice.count}
+                </span>
+              </div>
+            )}
 
             {/* Legend */}
             <div className="donut-legend">
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                onClick={() =>
+                  setSelectedDonutSlice({ label: 'Completed', count: 28, color: '#16a34a' })
+                }
+              >
                 <div className="legend-left">
                   <span className="legend-color-dot" style={{ background: '#16a34a' }}></span>
                   <span>Completed</span>
                 </div>
                 <span className="legend-value">28</span>
               </div>
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                onClick={() =>
+                  setSelectedDonutSlice({ label: 'Active', count: 5, color: '#2563eb' })
+                }
+              >
                 <div className="legend-left">
                   <span className="legend-color-dot" style={{ background: '#2563eb' }}></span>
                   <span>Active</span>
                 </div>
                 <span className="legend-value">5</span>
               </div>
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                onClick={() =>
+                  setSelectedDonutSlice({ label: 'Delayed', count: 2, color: '#ea580c' })
+                }
+              >
                 <div className="legend-left">
                   <span className="legend-color-dot" style={{ background: '#ea580c' }}></span>
                   <span>Delayed</span>
                 </div>
                 <span className="legend-value">2</span>
               </div>
-              <div className="legend-item">
+              <div
+                className="legend-item"
+                onClick={() =>
+                  setSelectedDonutSlice({ label: 'Cancelled', count: 1, color: '#dc2626' })
+                }
+              >
                 <div className="legend-left">
                   <span className="legend-color-dot" style={{ background: '#dc2626' }}></span>
                   <span>Cancelled</span>
