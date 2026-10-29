@@ -14,6 +14,9 @@ const Layout = () => {
   if (location.pathname.includes('/dashboard')) {
     title = "Transport Overview";
     subtitle = "SKIT Jaipur Campus Transportation";
+  } else if (location.pathname.includes('/live-tracking')) {
+    title = "Live Tracking";
+    subtitle = "Real-time bus positions";
   } else if (location.pathname.includes('/students')) {
     title = "Student Management";
     subtitle = "1,240 enrolled students";
