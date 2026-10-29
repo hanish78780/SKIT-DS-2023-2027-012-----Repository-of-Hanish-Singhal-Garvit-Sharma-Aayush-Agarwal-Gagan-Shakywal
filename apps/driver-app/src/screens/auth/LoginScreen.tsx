@@ -8,38 +8,47 @@ import {
   Text,
   TextInput,
   View,
+  SafeAreaView,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+
 import PrimaryButton from '../../components/PrimaryButton';
+import {loginDriver, AuthSession} from '../../services/authApi';
 import colors from '../../theme/colors';
-import {shadows} from '../../theme/tokens';
 
 interface LoginScreenProps {
-  onLoginSuccess: (driverId: string) => void;
+  onLoginSuccess: (session: AuthSession) => void;
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
-  const [driverId, setDriverId] = useState('DRV-001');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    const trimmedDriverId = driverId.trim();
+  const handleLogin = async () => {
+    const trimmedEmail = email.trim().toLowerCase();
 
-    if (!trimmedDriverId || !password) {
-      setError('Please enter your Driver ID and password.');
+    if (!trimmedEmail || !password) {
+      setError('Please enter your email and password.');
       return;
     }
 
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const session = await loginDriver(trimmedEmail, password);
+      onLoginSuccess(session);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to sign in. Please try again.',
+      );
+    } finally {
       setLoading(false);
-      onLoginSuccess(trimmedDriverId);
-    }, 500);
+    }
   };
 
   return (
@@ -49,8 +58,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
-          {/* Header Branding */}
+          keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <View style={styles.skitBadgeContainer}>
               <View style={styles.skitBadgeInner}>
@@ -58,6 +66,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
                 <Text style={styles.skitBadgeSubtext}>JAIPUR</Text>
               </View>
             </View>
+
             <Text style={styles.appName}>UniTransit</Text>
             <Text style={styles.collegeName}>
               Swami Keshvanand Institute of Technology
@@ -65,24 +74,29 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
             <Text style={styles.subtitle}>Driver Portal</Text>
           </View>
 
-          {/* Form Card */}
-          <View style={[styles.card, shadows.medium]}>
-            <Text style={styles.title}>Welcome Back</Text>
+          <View style={styles.card}>
+            <Text style={styles.title}>Welcome Back!</Text>
             <Text style={styles.description}>
-              Sign in to manage your assigned campus bus & live trips.
+              Sign in with your registered driver account to continue.
             </Text>
 
-            <Text style={styles.label}>Driver ID</Text>
+            <Text style={styles.label}>Email Address</Text>
             <TextInput
-              value={driverId}
+              value={email}
               onChangeText={value => {
-                setDriverId(value);
-                if (error) setError('');
+                setEmail(value);
+                if (error) {
+                  setError('');
+                }
               }}
-              placeholder="e.g. DRV-001"
+              placeholder="Enter your registered email"
               placeholderTextColor={colors.textMuted}
-              autoCapitalize="characters"
+              keyboardType="email-address"
+              autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
+              accessibilityLabel="Email address"
+              returnKeyType="next"
               style={styles.input}
             />
 
@@ -92,16 +106,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
                 value={password}
                 onChangeText={value => {
                   setPassword(value);
-                  if (error) setError('');
+                  if (error) {
+                    setError('');
+                  }
                 }}
                 placeholder="Enter your password"
                 placeholderTextColor={colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="current-password"
+                accessibilityLabel="Password"
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
                 style={styles.passwordInput}
               />
+
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={
+                  showPassword ? 'Hide password' : 'Show password'
+                }
                 onPress={() => setShowPassword(current => !current)}
                 style={styles.showButton}>
                 <Text style={styles.showText}>
@@ -110,7 +135,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
               </Pressable>
             </View>
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? (
+              <Text accessibilityRole="alert" style={styles.errorText}>
+                {error}
+              </Text>
+            ) : null}
 
             <PrimaryButton
               title="Sign In"
@@ -121,7 +150,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({onLoginSuccess}) => {
 
             <Pressable
               accessibilityRole="button"
-              onPress={() => setError('Please contact SKIT Transport Cell to reset password.')}
+              onPress={() =>
+                setError(
+                  'Please contact SKIT Transport Cell to reset your password.',
+                )
+              }
               style={styles.forgotButton}>
               <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
@@ -261,6 +294,7 @@ const styles = StyleSheet.create({
   },
   showButton: {
     paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   showText: {
     color: colors.primary,
