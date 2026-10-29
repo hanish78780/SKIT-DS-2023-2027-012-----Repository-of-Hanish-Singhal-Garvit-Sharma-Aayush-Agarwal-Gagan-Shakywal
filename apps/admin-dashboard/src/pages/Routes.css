@@ -1,0 +1,259 @@
+.routes-page {
+  padding: 24px 32px;
+  background-color: #f4f7fb;
+  min-height: calc(100vh - 75px);
+  box-sizing: border-box;
+}
+
+/* Header & Add Button */
+.routes-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.add-route-btn {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-route-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* 2-Column Grid */
+.routes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* Individual Route Card */
+.route-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 24px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.route-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
+}
+
+/* Card Header */
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.route-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.route-destination {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.route-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.route-badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.route-badge.inactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Timeline Track */
+.route-timeline {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.timeline-point {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.point-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.point-dot.red {
+  background: #991b1b;
+  box-shadow: 0 0 0 2px rgba(153, 27, 27, 0.15);
+}
+
+.point-dot.blue {
+  background: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.point-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Timeline Middle Body */
+.timeline-middle {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  padding: 6px 0;
+}
+
+.timeline-track-col {
+  width: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  flex-shrink: 0;
+  position: relative;
+  min-height: 80px;
+}
+
+.timeline-track-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3.5px;
+  width: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.track-step-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-content-col {
+  margin-left: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.route-meta-stats {
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.route-meta-assignment {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.route-meta-assignment span {
+  font-weight: 600;
+}
+
+.route-meta-assignment .assignment-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Bottom Actions */
+.route-card-actions {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid #f8fafc;
+  margin-top: auto;
+}
+
+.btn-route-action {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.btn-route-action.edit {
+  color: #2563eb;
+}
+
+.btn-route-action.edit:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.btn-route-action.neutral {
+  color: #334155;
+}
+
+.btn-route-action.neutral:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .routes-grid {
+    grid-template-columns: 1fr;
+  }
+  .routes-page {
+    padding: 18px;
+  }
+}

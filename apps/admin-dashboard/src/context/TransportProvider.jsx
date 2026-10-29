@@ -84,6 +84,57 @@ const initialNotifications = [
   },
 ];
 
+const initialRoutes = [
+  {
+    id: 'Route 01',
+    name: 'Route 01',
+    origin: 'SKIT Campus',
+    destination: 'Tonk Road',
+    stopsCount: 8,
+    studentsCount: 44,
+    bus: 'RJ-14-AB-1088',
+    driver: 'Suresh Meena',
+    status: 'Active',
+    stopsList: ['SKIT Main Gate', 'Jagatpura Circle', 'Malviya Nagar', 'Gopalpura Flyover', 'Tonk Phatak', 'Gandhi Nagar', 'Tonk Road'],
+  },
+  {
+    id: 'Route 02',
+    name: 'Route 02',
+    origin: 'SKIT Campus',
+    destination: 'C-Scheme',
+    stopsCount: 6,
+    studentsCount: 36,
+    bus: 'RJ-14-AB-2231',
+    driver: 'Mohan Sharma',
+    status: 'Active',
+    stopsList: ['SKIT Main Gate', 'JLN Marg', 'Rambagh Circle', 'Statue Circle', 'Ahinsa Circle', 'C-Scheme'],
+  },
+  {
+    id: 'Route 03',
+    name: 'Route 03',
+    origin: 'SKIT Campus',
+    destination: 'Jaipur City',
+    stopsCount: 12,
+    studentsCount: 42,
+    bus: 'RJ-14-AB-1234',
+    driver: 'Rajesh Kumar',
+    status: 'Active',
+    stopsList: ['SKIT Main Gate', 'Pratap Nagar', 'Sanganer Stadium', 'Durgapura', 'Maharani Farm', 'Tonk Phatak', 'Civil Lines', 'Railway Station', 'Jaipur City'],
+  },
+  {
+    id: 'Route 04',
+    name: 'Route 04',
+    origin: 'SKIT Campus',
+    destination: 'Mansarovar',
+    stopsCount: 9,
+    studentsCount: 31,
+    bus: 'RJ-14-AB-4512',
+    driver: 'Dinesh Yadav',
+    status: 'Active',
+    stopsList: ['SKIT Main Gate', 'NRI Colony', 'Haldi Ghati Marg', 'Kalyan Nagar', 'VT Road', 'Mansarovar Metro', 'Mansarovar'],
+  },
+];
+
 /**
  * Sanitizes route strings to guarantee balanced, single parentheses:
  * e.g. "Route 03 (SKIT → Mansarovar))))" -> "Route 03 (SKIT → Mansarovar)"
@@ -170,6 +221,21 @@ export const TransportProvider = ({ children }) => {
     return initialNotifications;
   });
 
+  const [routes, setRoutes] = useState(() => {
+    const saved = localStorage.getItem('unitransit_routes');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return initialRoutes;
+  });
+
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem('unitransit_drivers', JSON.stringify(drivers));
@@ -191,11 +257,15 @@ export const TransportProvider = ({ children }) => {
     localStorage.setItem('unitransit_notifications', JSON.stringify(notifications));
   }, [notifications]);
 
+  useEffect(() => {
+    localStorage.setItem('unitransit_routes', JSON.stringify(routes));
+  }, [routes]);
+
   // --- CROSS-SYNCHRONIZATION ACTIONS ---
 
   /**
    * Assign driver to a bus and route.
-   * Synchronizes across Drivers, Buses, Trips, and Students.
+   * Synchronizes across Drivers, Buses, Trips, Students, and Routes.
    */
   const assignDriver = (driverId, { bus, route, trip }) => {
     const targetDriver = drivers.find((d) => d.id === driverId);
@@ -254,6 +324,17 @@ export const TransportProvider = ({ children }) => {
     if (bus && bus !== '—') {
       setStudents((prev) =>
         prev.map((s) => (s.bus === bus ? { ...s, route: route } : s))
+      );
+    }
+
+    // 5. Update Routes
+    if (route && route !== '—') {
+      setRoutes((prev) =>
+        prev.map((r) =>
+          r.id === route || r.name === route
+            ? { ...r, driver: targetDriver.name, bus: bus && bus !== '—' ? bus : r.bus }
+            : r
+        )
       );
     }
 
@@ -386,6 +467,17 @@ export const TransportProvider = ({ children }) => {
       prev.map((s) => (s.bus === busId ? { ...s, route: route } : s))
     );
 
+    // 5. Update Routes
+    if (route && route !== '—') {
+      setRoutes((prev) =>
+        prev.map((r) =>
+          r.id === route || r.name === route
+            ? { ...r, bus: busId, driver: driver !== 'Unassigned' ? driver : r.driver }
+            : r
+        )
+      );
+    }
+
     addNotification({
       type: 'success',
       title: 'Bus Route Assigned',
@@ -493,6 +585,67 @@ export const TransportProvider = ({ children }) => {
   };
 
   /**
+   * Route Management Actions
+   */
+  const addRoute = (newRoute) => {
+    setRoutes((prev) => [...prev, newRoute]);
+    addNotification({
+      type: 'info',
+      title: 'New Route Added',
+      message: `${newRoute.name} (${newRoute.origin} → ${newRoute.destination}) added to campus network.`,
+    });
+  };
+
+  const updateRoute = (routeId, updatedData) => {
+    setRoutes((prev) =>
+      prev.map((r) => (r.id === routeId ? { ...r, ...updatedData } : r))
+    );
+    addNotification({
+      type: 'success',
+      title: 'Route Updated',
+      message: `${routeId} updated successfully.`,
+    });
+  };
+
+  const addStopToRoute = (routeId, stopName) => {
+    setRoutes((prev) =>
+      prev.map((r) => {
+        if (r.id === routeId) {
+          const currentList = r.stopsList || [];
+          return {
+            ...r,
+            stopsCount: (r.stopsCount || currentList.length) + 1,
+            stopsList: [...currentList, stopName],
+          };
+        }
+        return r;
+      })
+    );
+    addNotification({
+      type: 'success',
+      title: 'Stop Added',
+      message: `Stop "${stopName}" added to ${routeId}.`,
+    });
+  };
+
+  const assignBusToRoute = (routeId, { bus, driver }) => {
+    setRoutes((prev) =>
+      prev.map((r) =>
+        r.id === routeId
+          ? {
+              ...r,
+              bus: bus,
+              driver: driver || r.driver,
+            }
+          : r
+      )
+    );
+    if (bus && bus !== '—') {
+      assignBus(bus, { driver, route: routeId });
+    }
+  };
+
+  /**
    * Notification Handlers
    */
   const addNotification = ({
@@ -543,6 +696,7 @@ export const TransportProvider = ({ children }) => {
         buses,
         students,
         trips,
+        routes,
         notifications,
         unreadNotificationsCount: notifications.filter((n) => !n.read).length,
         addNotification,
@@ -562,6 +716,10 @@ export const TransportProvider = ({ children }) => {
         addStudent,
         updateStudent,
         unassignStudent,
+        addRoute,
+        updateRoute,
+        addStopToRoute,
+        assignBusToRoute,
       }}
     >
       {children}
