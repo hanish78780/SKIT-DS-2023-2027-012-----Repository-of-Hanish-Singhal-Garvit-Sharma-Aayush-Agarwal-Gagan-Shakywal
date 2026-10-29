@@ -17,6 +17,9 @@ const Layout = () => {
   } else if (location.pathname.includes('/live-tracking')) {
     title = "Live Tracking";
     subtitle = "Real-time bus positions";
+  } else if (location.pathname.includes('/routes')) {
+    title = "Routes & Stops";
+    subtitle = "Campus transportation network";
   } else if (location.pathname.includes('/students')) {
     title = "Student Management";
     subtitle = "1,240 enrolled students";
