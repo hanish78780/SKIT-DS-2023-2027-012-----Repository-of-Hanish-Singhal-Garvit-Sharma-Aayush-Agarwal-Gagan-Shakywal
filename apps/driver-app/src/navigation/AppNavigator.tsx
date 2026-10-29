@@ -11,6 +11,7 @@ import SplashScreen from '../screens/splash/SplashScreen';
 import ActiveTripScreen from '../screens/trip/ActiveTripScreen';
 import TripSummaryModal from '../screens/trip/TripSummaryModal';
 import {TripState} from '../types/driver';
+import {AuthSession} from '../services/authApi';
 import colors from '../theme/colors';
 import {useLocation} from '../hooks/useLocation';
 
@@ -19,16 +20,21 @@ type ScreenState = 'SPLASH' | 'AUTH' | 'MAIN';
 const AppNavigator: React.FC = () => {
   const [screenState, setScreenState] = useState<ScreenState>('SPLASH');
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
-  const [driverId, setDriverId] = useState<string>('DRV-001');
+  const [driverId, setDriverId] = useState<string>('');
+  const [authToken, setAuthToken] = useState<string>('');
   const [tripState, setTripState] = useState<TripState>('NOT_STARTED');
-  const [showTripSummaryModal, setShowTripSummaryModal] = useState<boolean>(false);
+  const [showTripSummaryModal, setShowTripSummaryModal] =
+    useState<boolean>(false);
 
-  // Active trip & driver credentials for API location upload
+  // Temporary trip ID. We will replace this with the driver's actual assigned trip.
   const [activeTripId] = useState<string>('6ad90873078dc055e14277ee');
-  const [authToken] = useState<string>('driver_dev_auth_jwt_token');
 
-  // GPS foreground location hook – shared across Dashboard and ActiveTrip
-  const {locationState, uploadState, startTracking, stopTracking} = useLocation({
+  const {
+    locationState,
+    uploadState,
+    startTracking,
+    stopTracking,
+  } = useLocation({
     tripId: activeTripId,
     authToken,
     uploadIntervalMs: 5000,
@@ -38,31 +44,40 @@ const AppNavigator: React.FC = () => {
     setScreenState('AUTH');
   };
 
-  const handleLoginSuccess = (id: string) => {
-    setDriverId(id);
-    setScreenState('MAIN');
+  const handleLoginSuccess = (session: AuthSession) => {
+    setDriverId(session.user.id);
+    setAuthToken(session.token);
+    setTripState('NOT_STARTED');
     setActiveTab('dashboard');
+    setScreenState('MAIN');
   };
 
   const handleLogout = () => {
-    // Stop GPS tracking and abort in-flight uploads when driver logs out
     stopTracking();
+
     setTripState('NOT_STARTED');
-    setScreenState('AUTH');
+    setAuthToken('');
+    setDriverId('');
+    setShowTripSummaryModal(false);
     setActiveTab('dashboard');
+    setScreenState('AUTH');
   };
 
   const handleToggleTrip = () => {
     if (tripState === 'NOT_STARTED') {
-      // Start trip → request GPS, initiate API upload, and navigate to ActiveTrip
+      if (!authToken) {
+        setScreenState('AUTH');
+        return;
+      }
+
       setTripState('TRIP_STARTED');
       setActiveTab('activeTrip');
+
       startTracking({
         tripId: activeTripId,
         authToken,
       });
     } else {
-      // Stop trip → stop GPS, abort uploads, and show summary
       stopTracking();
       setTripState('NOT_STARTED');
       setShowTripSummaryModal(true);
@@ -82,6 +97,7 @@ const AppNavigator: React.FC = () => {
             onNavigateTab={tab => setActiveTab(tab)}
           />
         );
+
       case 'activeTrip':
         return (
           <ActiveTripScreen
@@ -92,12 +108,16 @@ const AppNavigator: React.FC = () => {
             onNavigateToStudents={() => setActiveTab('students')}
           />
         );
+
       case 'students':
         return <RouteStudentsScreen />;
+
       case 'notifications':
         return <NotificationsScreen />;
+
       case 'profile':
         return <DriverProfileScreen onLogout={handleLogout} />;
+
       default:
         return (
           <DriverDashboardScreen
@@ -122,7 +142,9 @@ const AppNavigator: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.screenContainer}>{renderActiveTabScreen()}</View>
+      <View style={styles.screenContainer}>
+        {renderActiveTabScreen()}
+      </View>
 
       <BottomNavigation
         activeTab={activeTab}
