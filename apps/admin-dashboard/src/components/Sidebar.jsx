@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, MapPin, Bus, UserRound, Users, Route, Clock, Bell, BarChart3, Settings, Home, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, MapPin, Bus, UserRound, Users, Route, Clock, Bell, BarChart3, Settings, LogOut, X } from 'lucide-react';
 import { useTransport } from '../context/useTransport';
 import './Sidebar.css';
 
@@ -67,10 +67,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               <Settings size={20} />
               <span>Settings</span>
             </NavLink>
-            <NavLink to="/system-overview" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-              <Home size={20} />
-              <span>System Overview</span>
-            </NavLink>
           </nav>
         </div>
       </div>
@@ -92,3 +88,4 @@ const Sidebar = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
+
